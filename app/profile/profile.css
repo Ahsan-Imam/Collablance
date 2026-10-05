@@ -1,0 +1,130 @@
+.profile-page {
+  padding: var(--space-2xl) 0;
+}
+
+.profile-page__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+  margin-bottom: var(--space-2xl);
+}
+
+.profile-page__title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--cl-text);
+}
+
+.profile-page__subtitle {
+  font-size: 0.9375rem;
+  color: var(--cl-text-secondary);
+  margin-top: var(--space-xs);
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.profile-form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+}
+
+.profile-form__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--cl-border-light);
+}
+
+.profile-form__saved {
+  font-size: 0.875rem;
+  color: var(--cl-success);
+  font-weight: 600;
+}
+
+/* Skill Tags */
+.skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.skill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0.25rem 0.75rem;
+  background: var(--cl-primary-50);
+  color: var(--cl-primary-700);
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+[data-theme="dark"] .skill-tag {
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--cl-primary-300);
+}
+
+.skill-tag__remove {
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--cl-primary-400);
+  padding: 0;
+  margin-left: 2px;
+}
+
+.skill-tag__remove:hover {
+  color: var(--cl-error);
+}
+
+.skill-search-wrapper {
+  position: relative;
+}
+
+.skill-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--cl-surface);
+  border: 1px solid var(--cl-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+  max-height: 240px;
+  overflow-y: auto;
+  animation: fadeInDown 0.2s ease-out;
+}
+
+.skill-dropdown__item {
+  display: block;
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  text-align: left;
+  font-size: 0.875rem;
+  color: var(--cl-text);
+  transition: background var(--transition-fast);
+}
+
+.skill-dropdown__item:hover {
+  background: var(--cl-bg-secondary);
+}
+
+@media (max-width: 768px) {
+  .profile-page__header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-form__grid {
+    grid-template-columns: 1fr;
+  }
+}
