@@ -94,6 +94,16 @@
   background: rgba(99, 102, 241, 0.15);
 }
 
+.navbar__link--context {
+  background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.08));
+  border: 1px solid rgba(99,102,241,0.15);
+}
+
+.navbar__link--context:hover {
+  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15));
+  border-color: rgba(99,102,241,0.35);
+}
+
 .navbar__actions {
   display: flex;
   align-items: center;
