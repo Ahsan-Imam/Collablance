@@ -170,3 +170,36 @@
     overflow-x: auto;
   }
 }
+
+/* Project card status + skills */
+.project-card__status {
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.project-card__deadline {
+  font-size: 0.8125rem;
+  color: var(--cl-text-tertiary);
+}
+
+.project-card__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+/* Project card as a card block */
+.project-card {
+  background: var(--cl-surface);
+  border: 1.5px solid var(--cl-border);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem 1.5rem;
+  transition: all var(--transition-base);
+}
+
+.project-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--cl-primary-200);
+  transform: translateY(-2px);
+}

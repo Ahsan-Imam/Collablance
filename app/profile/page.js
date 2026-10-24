@@ -36,18 +36,24 @@ export default function ProfilePage() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user)
       if (user) {
-        // Load profile from metadata for now; will switch to DB table
-        const meta = user.user_metadata || {}
-        setProfile(prev => ({
-          ...prev,
-          full_name: meta.full_name || '',
-          bio: meta.bio || '',
-          skills: meta.skills || [],
-          hourly_rate: meta.hourly_rate || '',
-          location: meta.location || '',
-          portfolio_url: meta.portfolio_url || '',
-          experience_years: meta.experience_years || '',
-        }))
+        // Load from profiles table
+        fetch('/api/profile')
+          .then(r => r.json())
+          .then(json => {
+            if (json.data) {
+              const d = json.data
+              setProfile(prev => ({
+                ...prev,
+                full_name:        d.full_name        || '',
+                bio:              d.bio              || '',
+                skills:           d.skills           || [],
+                hourly_rate:      d.hourly_rate      || '',
+                location:         d.location         || '',
+                portfolio_url:    d.portfolio_url    || '',
+                experience_years: d.experience_years || '',
+              }))
+            }
+          })
       }
       setLoading(false)
     })
@@ -75,22 +81,14 @@ export default function ProfilePage() {
   const handleSave = async (e) => {
     e.preventDefault()
     setSaving(true)
-
     try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          full_name: profile.full_name,
-          bio: profile.bio,
-          skills: profile.skills,
-          hourly_rate: profile.hourly_rate,
-          location: profile.location,
-          portfolio_url: profile.portfolio_url,
-          experience_years: profile.experience_years,
-        },
+      const res = await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profile),
       })
-
-      if (error) throw error
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {

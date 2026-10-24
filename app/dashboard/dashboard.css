@@ -218,3 +218,77 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Activity feed */
+.dashboard__activity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  background: var(--cl-bg-secondary);
+  border: 1px solid var(--cl-border-light);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: var(--cl-text);
+  transition: all var(--transition-fast);
+}
+
+.activity-item:hover {
+  border-color: var(--cl-primary-200);
+  background: var(--cl-surface);
+}
+
+.activity-item__icon { font-size: 1.25rem; flex-shrink: 0; }
+.activity-item__text { flex: 1; font-size: 0.875rem; color: var(--cl-text-secondary); }
+.activity-item__text strong { color: var(--cl-text); font-weight: 600; }
+.activity-item__arrow { color: var(--cl-text-tertiary); font-size: 0.9rem; }
+
+/* Collective card for collectives page */
+.collective-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--cl-surface);
+  border: 1.5px solid var(--cl-border);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  transition: all var(--transition-base);
+}
+
+.collective-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--cl-primary-200);
+  transform: translateY(-2px);
+}
+
+.collective-card__avatar {
+  width: 3rem; height: 3rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--cl-primary-500), var(--cl-accent-500));
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.collective-card__body { flex: 1; min-width: 0; }
+.collective-card__name { font-weight: 700; font-size: 1rem; color: var(--cl-text); }
+.collective-card__desc {
+  font-size: 0.8125rem; color: var(--cl-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin: 0.25rem 0;
+}
+.collective-card__meta { display: flex; align-items: center; gap: 0.625rem; }
+.collective-card__members { font-size: 0.78rem; color: var(--cl-text-tertiary); }
+.collective-card__arrow { color: var(--cl-text-tertiary); flex-shrink: 0; }

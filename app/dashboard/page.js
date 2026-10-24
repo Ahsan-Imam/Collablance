@@ -7,14 +7,26 @@ import './dashboard.css'
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null)
+  const [stats, setStats] = useState({ collective_count: 0, active_projects: 0 })
+  const [recentCollectives, setRecentCollectives] = useState([])
+  const [recentProjects, setRecentProjects] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user)
-      setLoading(false)
-    })
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
+
+    fetch('/api/dashboard')
+      .then(r => r.json())
+      .then(json => {
+        if (json.data) {
+          setStats(json.data.stats)
+          setRecentCollectives(json.data.collectives.slice(0, 3))
+          setRecentProjects(json.data.projects.slice(0, 3))
+        }
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [])
 
   if (loading) {
@@ -60,28 +72,28 @@ export default function DashboardPage() {
           <div className="stat-card" id="stat-collectives">
             <div className="stat-card__icon">👥</div>
             <div className="stat-card__data">
-              <span className="stat-card__number">0</span>
+              <span className="stat-card__number">{stats.collective_count}</span>
               <span className="stat-card__label">Collectives</span>
             </div>
           </div>
           <div className="stat-card" id="stat-projects">
             <div className="stat-card__icon">📋</div>
             <div className="stat-card__data">
-              <span className="stat-card__number">0</span>
+              <span className="stat-card__number">{stats.active_projects}</span>
               <span className="stat-card__label">Active Projects</span>
             </div>
           </div>
           <div className="stat-card" id="stat-earnings">
             <div className="stat-card__icon">💰</div>
             <div className="stat-card__data">
-              <span className="stat-card__number">₹0</span>
+              <span className="stat-card__number">₹{stats.total_earnings?.toLocaleString() || '0'}</span>
               <span className="stat-card__label">Total Earnings</span>
             </div>
           </div>
           <div className="stat-card" id="stat-rating">
             <div className="stat-card__icon">⭐</div>
             <div className="stat-card__data">
-              <span className="stat-card__number">—</span>
+              <span className="stat-card__number">{stats.avg_rating || '—'}</span>
               <span className="stat-card__label">Avg Rating</span>
             </div>
           </div>
@@ -118,16 +130,36 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Recent Activity — empty state */}
+        {/* Recent Activity */}
         <div className="dashboard__section animate-fade-in-up" style={{ animationDelay: '300ms' }}>
           <h2 className="dashboard__section-title">Recent Activity</h2>
-          <div className="dashboard__empty">
-            <span className="dashboard__empty-icon">📭</span>
-            <p className="dashboard__empty-text">No activity yet</p>
-            <p className="dashboard__empty-hint">
-              Start by completing your profile and joining a collective.
-            </p>
-          </div>
+          {recentCollectives.length === 0 && recentProjects.length === 0 ? (
+            <div className="dashboard__empty">
+              <span className="dashboard__empty-icon">📭</span>
+              <p className="dashboard__empty-text">No activity yet</p>
+              <p className="dashboard__empty-hint">Start by completing your profile and joining a collective.</p>
+            </div>
+          ) : (
+            <div className="dashboard__activity">
+              {recentCollectives.map(m => (
+                <a key={m.collective_id} href={`/collectives/${m.collective_id}`} className="activity-item">
+                  <span className="activity-item__icon">👥</span>
+                  <span className="activity-item__text">
+                    <strong>{m.collectives?.name}</strong> — {m.role}
+                  </span>
+                  <span className="activity-item__arrow">→</span>
+                </a>
+              ))}
+              {recentProjects.map(p => (
+                <div key={p.id} className="activity-item">
+                  <span className="activity-item__icon">📋</span>
+                  <span className="activity-item__text">
+                    <strong>{p.title}</strong> — {p.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
