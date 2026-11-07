@@ -46,7 +46,8 @@ function SignupForm() {
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          // The callback turns the new account into a client when role=client
+          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard&role=${role}`,
         },
       })
 
@@ -172,31 +173,26 @@ function SignupForm() {
           </div>
         )}
 
-        {/* Google Sign-Up — OAuth can't pass the role choice, so Google
-            accounts are always freelancers; clients sign up with email */}
-        {role === 'freelancer' && (
-          <>
-            <button
-              onClick={handleGoogleSignup}
-              className="btn btn--google btn--full"
-              disabled={googleLoading}
-              id="google-signup"
-            >
-              {googleLoading ? (
-                'Redirecting to Google...'
-              ) : (
-                <>
-                  <GoogleIcon />
-                  Continue with Google
-                </>
-              )}
-            </button>
+        {/* Google Sign-Up — the chosen role travels via the callback URL */}
+        <button
+          onClick={handleGoogleSignup}
+          className="btn btn--google btn--full"
+          disabled={googleLoading}
+          id="google-signup"
+        >
+          {googleLoading ? (
+            'Redirecting to Google...'
+          ) : (
+            <>
+              <GoogleIcon />
+              {role === 'client' ? 'Sign up as Client with Google' : 'Continue with Google'}
+            </>
+          )}
+        </button>
 
-            <div className="auth-form__divider">
-              <span>or sign up with email</span>
-            </div>
-          </>
-        )}
+        <div className="auth-form__divider">
+          <span>or sign up with email</span>
+        </div>
 
         <form onSubmit={handleSignup} className="auth-form" id="signup-form">
           <div className="input-group">
@@ -279,7 +275,7 @@ function SignupForm() {
         <div className="auth-card__footer">
           <p>
             Already have an account?{' '}
-            <Link href="/auth/login" className="auth-card__link" id="signup-to-login">
+            <Link href={role === 'client' ? '/auth/login?role=client' : '/auth/login'} className="auth-card__link" id="signup-to-login">
               Log in
             </Link>
           </p>

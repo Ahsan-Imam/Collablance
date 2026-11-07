@@ -196,6 +196,9 @@ export default function ForClientsPage() {
                 <Link href="/auth/signup?role=client" className="btn btn--accent btn--xl" id="clients-cta-signup">
                   Create Client Account
                 </Link>
+                <Link href="/auth/login?role=client" className="btn btn--secondary btn--xl" id="clients-cta-login">
+                  Client Log In
+                </Link>
               </div>
             </div>
           </div>
