@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRole } from '@/lib/hooks/useRole'
 import './collectives.css'
 
 const FOCUS_LABELS = {
@@ -37,9 +38,13 @@ export default function CollectivesPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [error, setError] = useState('')
+  const { role, loading: roleLoading } = useRole()
+  // Clients browse every public collective; freelancers see the ones they're in
+  const isClient = role === 'client'
 
   useEffect(() => {
-    fetch('/api/collectives?mine=true')
+    if (roleLoading) return
+    fetch(isClient ? '/api/collectives' : '/api/collectives?mine=true')
       .then(r => r.json())
       .then(json => {
         if (json.error) setError(json.error)
@@ -50,7 +55,7 @@ export default function CollectivesPage() {
         setError('Failed to load collectives')
         setLoading(false)
       })
-  }, [])
+  }, [roleLoading, isClient])
 
   const visible = collectives.filter(c =>
     !search.trim() || c.name.toLowerCase().includes(search.toLowerCase())
@@ -61,12 +66,22 @@ export default function CollectivesPage() {
       <div className="container">
         <div className="collectives-page__header animate-fade-in-up">
           <div>
-            <h1 className="collectives-page__title">Your Collectives</h1>
-            <p className="collectives-page__subtitle">Manage your teams or create a new one.</p>
+            <h1 className="collectives-page__title">{isClient ? 'Find a Collective' : 'Your Collectives'}</h1>
+            <p className="collectives-page__subtitle">
+              {isClient
+                ? 'Browse freelancer teams and find the right fit for your project.'
+                : 'Manage your teams or create a new one.'}
+            </p>
           </div>
-          <Link href="/collectives/create" className="btn btn--primary" id="create-collective-btn">
-            + Create Collective
-          </Link>
+          {isClient ? (
+            <Link href="/projects/create" className="btn btn--primary" id="collectives-post-project">
+              + Post Project
+            </Link>
+          ) : (
+            <Link href="/collectives/create" className="btn btn--primary" id="create-collective-btn">
+              + Create Collective
+            </Link>
+          )}
         </div>
 
         <div className="collectives-page__search animate-fade-in-up" style={{ animationDelay: '100ms' }}>
@@ -88,14 +103,16 @@ export default function CollectivesPage() {
           <div className="collectives-empty animate-fade-in-up" style={{ animationDelay: '200ms' }}>
             <div className="collectives-empty__icon">👥</div>
             <h2 className="collectives-empty__title">
-              {search ? 'No collectives match your search' : 'No collectives yet'}
+              {search ? 'No collectives match your search' : isClient ? 'No public collectives yet' : 'No collectives yet'}
             </h2>
             <p className="collectives-empty__desc">
               {search
                 ? 'Try a different name.'
-                : 'Create your first collective to start teaming up with other freelancers.'}
+                : isClient
+                  ? 'Freelancer teams will show up here as they form. Post a project so they can find you.'
+                  : 'Create your first collective to start teaming up with other freelancers.'}
             </p>
-            {!search && (
+            {!search && !isClient && (
               <Link href="/collectives/create" className="btn btn--primary btn--lg" id="empty-create-collective">
                 Create Your First Collective
               </Link>

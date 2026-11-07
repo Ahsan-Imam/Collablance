@@ -20,6 +20,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+  const [role, setRole] = useState(null)
   const [profile, setProfile] = useState({
     full_name: '',
     bio: '',
@@ -47,6 +48,7 @@ export default function ProfilePage() {
           if (json.error) setError(json.error)
           if (json.data) {
             const d = json.data
+            setRole(d.role || 'freelancer')
             setProfile(prev => ({
               ...prev,
               full_name:        d.full_name        || '',
@@ -119,6 +121,10 @@ export default function ProfilePage() {
     )
   }
 
+  // Clients get a company-style profile on the same columns:
+  // name, location, about (bio) and website (portfolio_url)
+  const isClient = role === 'client'
+
   return (
     <div className="profile-page">
       <div className="container container--narrow">
@@ -127,9 +133,16 @@ export default function ProfilePage() {
             {profile.full_name?.[0]?.toUpperCase() || '?'}
           </div>
           <div>
-            <h1 className="profile-page__title">Your Profile</h1>
+            <h1 className="profile-page__title">
+              Your Profile{' '}
+              {role && (
+                <span className="badge badge--primary" style={{ verticalAlign: 'middle' }}>
+                  {role === 'client' ? '💼 Client' : '🧑‍💻 Freelancer'}
+                </span>
+              )}
+            </h1>
             <p className="profile-page__subtitle">
-              This is how clients and collectives see you.
+              {isClient ? 'This is how collectives see you and your company.' : 'This is how clients and collectives see you.'}
             </p>
           </div>
         </div>
@@ -139,13 +152,13 @@ export default function ProfilePage() {
         <form onSubmit={handleSave} className="profile-form card animate-fade-in-up" style={{ animationDelay: '100ms' }} id="profile-form">
           <div className="profile-form__grid">
             <div className="input-group">
-              <label htmlFor="full_name" className="input-label">Full Name</label>
+              <label htmlFor="full_name" className="input-label">{isClient ? 'Name or Company' : 'Full Name'}</label>
               <input
                 id="full_name"
                 name="full_name"
                 type="text"
                 className="input"
-                placeholder="Your full name"
+                placeholder={isClient ? 'e.g. Bakehouse Pvt Ltd' : 'Your full name'}
                 value={profile.full_name}
                 onChange={handleChange}
                 required
@@ -165,43 +178,49 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="input-group">
-              <label htmlFor="hourly_rate" className="input-label">Hourly Rate (₹)</label>
-              <input
-                id="hourly_rate"
-                name="hourly_rate"
-                type="number"
-                className="input"
-                placeholder="e.g. 1500"
-                value={profile.hourly_rate}
-                onChange={handleChange}
-                min="0"
-              />
-            </div>
+            {!isClient && (
+              <>
+                <div className="input-group">
+                  <label htmlFor="hourly_rate" className="input-label">Hourly Rate (₹)</label>
+                  <input
+                    id="hourly_rate"
+                    name="hourly_rate"
+                    type="number"
+                    className="input"
+                    placeholder="e.g. 1500"
+                    value={profile.hourly_rate}
+                    onChange={handleChange}
+                    min="0"
+                  />
+                </div>
 
-            <div className="input-group">
-              <label htmlFor="experience_years" className="input-label">Years of Experience</label>
-              <input
-                id="experience_years"
-                name="experience_years"
-                type="number"
-                className="input"
-                placeholder="e.g. 3"
-                value={profile.experience_years}
-                onChange={handleChange}
-                min="0"
-                max="50"
-              />
-            </div>
+                <div className="input-group">
+                  <label htmlFor="experience_years" className="input-label">Years of Experience</label>
+                  <input
+                    id="experience_years"
+                    name="experience_years"
+                    type="number"
+                    className="input"
+                    placeholder="e.g. 3"
+                    value={profile.experience_years}
+                    onChange={handleChange}
+                    min="0"
+                    max="50"
+                  />
+                </div>
+              </>
+            )}
           </div>
 
           <div className="input-group">
-            <label htmlFor="bio" className="input-label">Bio</label>
+            <label htmlFor="bio" className="input-label">{isClient ? 'About Your Company' : 'Bio'}</label>
             <textarea
               id="bio"
               name="bio"
               className="input textarea"
-              placeholder="Tell us about yourself, your expertise, and what you love working on..."
+              placeholder={isClient
+                ? 'What does your company do, and what kind of projects do you usually hire for?'
+                : 'Tell us about yourself, your expertise, and what you love working on...'}
               value={profile.bio}
               onChange={handleChange}
               maxLength={500}
@@ -210,66 +229,68 @@ export default function ProfilePage() {
           </div>
 
           <div className="input-group">
-            <label htmlFor="portfolio_url" className="input-label">Portfolio URL</label>
+            <label htmlFor="portfolio_url" className="input-label">{isClient ? 'Company Website' : 'Portfolio URL'}</label>
             <input
               id="portfolio_url"
               name="portfolio_url"
               type="url"
               className="input"
-              placeholder="https://yourportfolio.com"
+              placeholder={isClient ? 'https://yourcompany.com' : 'https://yourportfolio.com'}
               value={profile.portfolio_url}
               onChange={handleChange}
             />
           </div>
 
-          {/* Skill Tags */}
-          <div className="input-group">
-            <label className="input-label">Skills (up to 15)</label>
-            <div className="skill-tags">
-              {profile.skills.map(skill => (
-                <span key={skill} className="skill-tag">
-                  {skill}
-                  <button
-                    type="button"
-                    className="skill-tag__remove"
-                    onClick={() => removeSkill(skill)}
-                    aria-label={`Remove ${skill}`}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-            <div className="skill-search-wrapper">
-              <input
-                type="text"
-                className="input"
-                placeholder="Search and add skills..."
-                value={skillSearch}
-                onChange={(e) => {
-                  setSkillSearch(e.target.value)
-                  setShowSkillDropdown(true)
-                }}
-                onFocus={() => setShowSkillDropdown(true)}
-                onBlur={() => setTimeout(() => setShowSkillDropdown(false), 200)}
-                id="skill-search"
-              />
-              {showSkillDropdown && skillSearch && filteredSkills.length > 0 && (
-                <div className="skill-dropdown">
-                  {filteredSkills.slice(0, 8).map(skill => (
+          {/* Skill Tags — freelancers only */}
+          {!isClient && (
+            <div className="input-group">
+              <label className="input-label">Skills (up to 15)</label>
+              <div className="skill-tags">
+                {profile.skills.map(skill => (
+                  <span key={skill} className="skill-tag">
+                    {skill}
                     <button
-                      key={skill}
                       type="button"
-                      className="skill-dropdown__item"
-                      onMouseDown={() => addSkill(skill)}
+                      className="skill-tag__remove"
+                      onClick={() => removeSkill(skill)}
+                      aria-label={`Remove ${skill}`}
                     >
-                      {skill}
+                      ×
                     </button>
-                  ))}
-                </div>
-              )}
+                  </span>
+                ))}
+              </div>
+              <div className="skill-search-wrapper">
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="Search and add skills..."
+                  value={skillSearch}
+                  onChange={(e) => {
+                    setSkillSearch(e.target.value)
+                    setShowSkillDropdown(true)
+                  }}
+                  onFocus={() => setShowSkillDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowSkillDropdown(false), 200)}
+                  id="skill-search"
+                />
+                {showSkillDropdown && skillSearch && filteredSkills.length > 0 && (
+                  <div className="skill-dropdown">
+                    {filteredSkills.slice(0, 8).map(skill => (
+                      <button
+                        key={skill}
+                        type="button"
+                        className="skill-dropdown__item"
+                        onMouseDown={() => addSkill(skill)}
+                      >
+                        {skill}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="profile-form__footer">
             {saved && (

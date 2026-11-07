@@ -26,6 +26,7 @@ export async function GET() {
         bio: '', skills: [], hourly_rate: null,
         location: '', portfolio_url: '', experience_years: null,
         is_available: true,
+        role: 'freelancer',
       }
     })
   }

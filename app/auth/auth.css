@@ -181,3 +181,54 @@
     border-radius: var(--radius-xl);
   }
 }
+
+/* ── Account type picker (signup) ── */
+.auth-role {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+
+.auth-role__option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: var(--space-md);
+  border: 1.5px solid var(--cl-border);
+  border-radius: var(--radius-lg);
+  background: var(--cl-surface);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  transition: border-color var(--transition-base), background var(--transition-base);
+}
+
+.auth-role__option:hover {
+  border-color: var(--cl-primary-200);
+}
+
+.auth-role__option--active {
+  border-color: var(--cl-primary-500);
+  background: var(--cl-primary-50);
+}
+
+.auth-role__icon {
+  font-size: 1.25rem;
+}
+
+.auth-role__title {
+  font-weight: 700;
+  color: var(--cl-text);
+}
+
+.auth-role__desc {
+  font-size: 0.75rem;
+  color: var(--cl-text-secondary);
+}
+
+.auth-role__hint {
+  font-size: 0.75rem;
+  color: var(--cl-text-tertiary);
+  margin: var(--space-xs) 0 var(--space-lg);
+}

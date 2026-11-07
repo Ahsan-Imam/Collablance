@@ -48,3 +48,16 @@
   padding-top: var(--space-md);
   border-top: 1px solid var(--cl-border-light);
 }
+
+.create-project__blocked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  text-align: center;
+  padding: var(--space-2xl) var(--space-xl);
+}
+
+.create-project__blocked-icon {
+  font-size: 2.5rem;
+}

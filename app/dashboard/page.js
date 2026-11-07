@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useRole } from '@/lib/hooks/useRole'
 import { createClient } from '@/lib/supabase/client'
 import './dashboard.css'
 
@@ -12,6 +14,13 @@ export default function DashboardPage() {
   const [recentProjects, setRecentProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const router = useRouter()
+  const { role } = useRole()
+
+  // Clients have their own hub — login and OAuth land here by default
+  useEffect(() => {
+    if (role === 'client') router.replace('/client')
+  }, [role, router])
 
   useEffect(() => {
     const supabase = createClient()
@@ -31,7 +40,7 @@ export default function DashboardPage() {
       .catch(() => { setError('Failed to load dashboard'); setLoading(false) })
   }, [])
 
-  if (loading) {
+  if (loading || role === 'client') {
     return (
       <div className="dashboard">
         <div className="container">
