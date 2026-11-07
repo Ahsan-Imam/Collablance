@@ -27,6 +27,8 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/dashboard'
   const authError = searchParams.get('error')
+  // /auth/login?role=client — client login (from the For Clients page / client signup)
+  const isClientLogin = searchParams.get('role') === 'client'
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -63,7 +65,8 @@ function LoginForm() {
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}`,
+          // role=client lets a first-time Google user become a client (existing accounts keep their role)
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}${isClientLogin ? '&role=client' : ''}`,
         },
       })
 
@@ -83,7 +86,7 @@ function LoginForm() {
       <div className="auth-card__header">
         <h1 className="auth-card__title">Welcome back</h1>
         <p className="auth-card__subtitle">
-          Log in to your CollabLance account
+          {isClientLogin ? 'Log in to your client account' : 'Log in to your CollabLance account'}
         </p>
       </div>
 
@@ -158,8 +161,8 @@ function LoginForm() {
       <div className="auth-card__footer">
         <p>
           Don&apos;t have an account?{' '}
-          <Link href="/auth/signup" className="auth-card__link" id="login-to-signup">
-            Sign up as a Freelancer
+          <Link href={isClientLogin ? '/auth/signup?role=client' : '/auth/signup'} className="auth-card__link" id="login-to-signup">
+            {isClientLogin ? 'Sign up as a Client' : 'Sign up'}
           </Link>
         </p>
       </div>

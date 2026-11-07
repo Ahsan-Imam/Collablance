@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="cl" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <!-- CollabLance hexagon (matches the ⬡ logo in the navbar and footer) -->
+  <polygon points="16,2.5 27.7,9.25 27.7,22.75 16,29.5 4.3,22.75 4.3,9.25"
+    fill="url(#cl)" fill-opacity="0.14"
+    stroke="url(#cl)" stroke-width="3.5" stroke-linejoin="round"/>
+</svg>

@@ -38,14 +38,14 @@ $$ language plpgsql security definer set search_path = public;
 
 -- ─────────────────────────────────────────────────────────────
 -- 3. Lock the role
---    Requests from signed-in users (auth.role() = 'authenticated')
---    can never set or change it. Signup (via handle_new_user above),
---    the SQL editor and service_role are unaffected.
+--    API requests (running as `authenticated` / `anon`) can never set
+--    or change it. SECURITY DEFINER functions (handle_new_user above,
+--    claim_client_role), the SQL editor and service_role are unaffected.
 -- ─────────────────────────────────────────────────────────────
 create or replace function lock_profile_role()
 returns trigger as $$
 begin
-  if auth.role() = 'authenticated' then
+  if current_user in ('authenticated', 'anon') then
     if tg_op = 'INSERT' then
       new.role := 'freelancer';
     else
