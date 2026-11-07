@@ -193,3 +193,7 @@
     justify-content: center;
   }
 }
+
+.navbar__role-toggle {
+  white-space: nowrap;
+}

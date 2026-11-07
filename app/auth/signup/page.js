@@ -81,13 +81,13 @@ function SignupForm() {
 
     try {
       const supabase = createClient()
-      const { error: authError } = await supabase.auth.signUp({
+      const { data, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           data: {
             full_name: formData.fullName,
-            // Copied into profiles.role by the handle_new_user trigger, then locked
+            // The handle_new_user trigger grants this role; the other can be added later
             role,
           },
         },
@@ -95,6 +95,14 @@ function SignupForm() {
 
       if (authError) {
         setError(authError.message)
+        return
+      }
+
+      // Supabase answers a signup for an existing email with a user that has no
+      // identities (instead of an error). One email = one account, which can hold
+      // both roles, so point them to log in and add this role there.
+      if (data.user && data.user.identities?.length === 0) {
+        setError(`This email already has a CollabLance account. Log in, then use "Become a ${role}" in the top bar to use it as a ${role} too.`)
         return
       }
 
@@ -164,7 +172,7 @@ function SignupForm() {
             </button>
           ))}
         </div>
-        <p className="auth-role__hint">You can&apos;t change this later.</p>
+        <p className="auth-role__hint">Already have an account? Log in and add the other role from the top bar — same email.</p>
 
         {error && (
           <div className="alert alert--error" id="signup-error">

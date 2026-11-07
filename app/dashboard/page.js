@@ -1,15 +1,13 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useRole } from '@/lib/hooks/useRole'
 import { createClient } from '@/lib/supabase/client'
 import './dashboard.css'
 
-function Dashboard() {
-  // Set by /auth/callback when an existing freelancer used the client Google button
-  const alreadyFreelancer = useSearchParams().get('notice') === 'already_freelancer'
+export default function DashboardPage() {
   const [user, setUser] = useState(null)
   const [stats, setStats] = useState({ collective_count: 0, active_projects: 0 })
   const [recentCollectives, setRecentCollectives] = useState([])
@@ -81,12 +79,6 @@ function Dashboard() {
         </div>
 
         {error && <div className="alert alert--error">{error}</div>}
-        {alreadyFreelancer && (
-          <div className="alert alert--info">
-            This Google account already has a freelancer account, so it stays a freelancer.
-            To hire, sign up as a client with a different email.
-          </div>
-        )}
 
         {/* Quick Stats */}
         <div className="dashboard__stats stagger-children">
@@ -185,13 +177,5 @@ function Dashboard() {
         </div>
       </div>
     </div>
-  )
-}
-
-export default function DashboardPage() {
-  return (
-    <Suspense>
-      <Dashboard />
-    </Suspense>
   )
 }

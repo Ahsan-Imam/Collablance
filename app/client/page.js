@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRole } from '@/lib/hooks/useRole'
+import AddRoleButton from '@/components/AddRoleButton/AddRoleButton'
 import ProjectCard from '@/components/ProjectCard/ProjectCard'
 import '../projects/projects.css'
 import './client.css'
@@ -10,13 +11,13 @@ import './client.css'
 const FILTER_LABELS = { all: 'All', open: 'Open', in_progress: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' }
 
 export default function ClientPage() {
-  const { user, role, loading: roleLoading } = useRole()
+  // The hub shows for any account with client access, whichever mode is active
+  const { user, isClient, loading: roleLoading } = useRole()
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState('all')
 
-  const isClient = role === 'client'
 
   useEffect(() => {
     if (!isClient) return
@@ -49,11 +50,13 @@ export default function ClientPage() {
         <div className="container container--narrow">
           <div className="card client-page__notice animate-fade-in-up">
             <div className="client-page__notice-icon">💼</div>
-            <h1 className="client-page__title">This page is for client accounts</h1>
+            <h1 className="client-page__title">Hire with this account too</h1>
             <p className="client-page__subtitle">
-              You&apos;re signed in as a freelancer. Your dashboard has your collectives and projects.
+              Your account is set up for freelancing. Add client access to post projects and hire
+              collectives — same email, same login. Switch modes from the top bar anytime.
             </p>
-            <Link href="/dashboard" className="btn btn--primary btn--lg">Go to Dashboard</Link>
+            <AddRoleButton role="client">Add client access</AddRoleButton>
+            <Link href="/dashboard" className="btn btn--ghost">Back to Dashboard</Link>
           </div>
         </div>
       </div>

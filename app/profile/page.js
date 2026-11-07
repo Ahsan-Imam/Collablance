@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useRole } from '@/lib/hooks/useRole'
+import AddRoleButton from '@/components/AddRoleButton/AddRoleButton'
 import './profile.css'
 
 const SKILL_OPTIONS = [
@@ -20,7 +22,8 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
-  const [role, setRole] = useState(null)
+  // Active mode + which roles this account has; refreshes when a role is added/switched
+  const { role, isClient: hasClient, isFreelancer: hasFreelancer } = useRole()
   const [profile, setProfile] = useState({
     full_name: '',
     bio: '',
@@ -48,7 +51,6 @@ export default function ProfilePage() {
           if (json.error) setError(json.error)
           if (json.data) {
             const d = json.data
-            setRole(d.role || 'freelancer')
             setProfile(prev => ({
               ...prev,
               full_name:        d.full_name        || '',
@@ -123,6 +125,7 @@ export default function ProfilePage() {
 
   // Clients get a company-style profile on the same columns:
   // name, location, about (bio) and website (portfolio_url)
+  // The form follows the active mode
   const isClient = role === 'client'
 
   return (
@@ -133,14 +136,23 @@ export default function ProfilePage() {
             {profile.full_name?.[0]?.toUpperCase() || '?'}
           </div>
           <div>
-            <h1 className="profile-page__title">
-              Your Profile{' '}
-              {role && (
-                <span className="badge badge--primary" style={{ verticalAlign: 'middle' }}>
-                  {role === 'client' ? '💼 Client' : '🧑‍💻 Freelancer'}
-                </span>
-              )}
-            </h1>
+            <h1 className="profile-page__title">Your Profile</h1>
+            {role && (
+              <div className="profile-page__roles">
+                {hasFreelancer && (
+                  <span className={`badge ${role === 'freelancer' ? 'badge--primary' : 'badge--neutral'}`}>
+                    🧑‍💻 Freelancer{role === 'freelancer' ? ' · active' : ''}
+                  </span>
+                )}
+                {hasClient && (
+                  <span className={`badge ${role === 'client' ? 'badge--primary' : 'badge--neutral'}`}>
+                    💼 Client{role === 'client' ? ' · active' : ''}
+                  </span>
+                )}
+                {!hasClient && <AddRoleButton role="client" className="btn btn--ghost btn--sm">+ Add client access</AddRoleButton>}
+                {!hasFreelancer && <AddRoleButton role="freelancer" className="btn btn--ghost btn--sm">+ Add freelancer access</AddRoleButton>}
+              </div>
+            )}
             <p className="profile-page__subtitle">
               {isClient ? 'This is how collectives see you and your company.' : 'This is how clients and collectives see you.'}
             </p>

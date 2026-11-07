@@ -4,11 +4,15 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { addRole, switchRole, ROLE_CHANGED_EVENT, ROLE_HOME } from '@/lib/roles'
 import './Navbar.css'
 
 export default function Navbar() {
   const [user, setUser] = useState(null)
+  // role = active mode; roles = which ones the account has
   const [role, setRole] = useState(null)
+  const [roles, setRoles] = useState({ client: false, freelancer: false })
+  const [switching, setSwitching] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [lastPathname, setLastPathname] = useState(null)
@@ -38,17 +42,39 @@ export default function Navbar() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Look up the locked role whenever the signed-in user changes
+  // Look up roles whenever the signed-in user changes, or a role is added/switched
   const userId = user?.id
   useEffect(() => {
     if (!userId) return
-    createClient()
+    const load = () => createClient()
       .from('profiles')
-      .select('role')
+      .select('role, is_client, is_freelancer')
       .eq('id', userId)
       .maybeSingle()
-      .then(({ data }) => setRole(data?.role || 'freelancer'))
+      .then(({ data }) => {
+        setRole(data?.role || 'freelancer')
+        setRoles({ client: !!data?.is_client, freelancer: data ? !!data.is_freelancer : true })
+      })
+    load()
+    window.addEventListener(ROLE_CHANGED_EVENT, load)
+    return () => window.removeEventListener(ROLE_CHANGED_EVENT, load)
   }, [userId])
+
+  // The other mode: switch to it if the account has it, otherwise add it
+  const otherRole = role === 'client' ? 'freelancer' : 'client'
+  const hasOtherRole = roles[otherRole]
+
+  const handleRoleToggle = async () => {
+    setSwitching(true)
+    try {
+      await (hasOtherRole ? switchRole(otherRole) : addRole(otherRole))
+      router.push(ROLE_HOME[otherRole])
+    } catch (err) {
+      console.error('Role change failed:', err.message)
+    } finally {
+      setSwitching(false)
+    }
+  }
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10)
@@ -125,6 +151,23 @@ export default function Navbar() {
                 🧠 Context
               </Link>
               <div className="navbar__actions">
+                {role && (
+                  <button
+                    onClick={handleRoleToggle}
+                    className="btn btn--secondary btn--sm navbar__role-toggle"
+                    disabled={switching}
+                    id="nav-role-toggle"
+                    title={hasOtherRole
+                      ? `You're in ${role} mode`
+                      : `Use the same account as a ${otherRole} too`}
+                  >
+                    {switching
+                      ? 'Switching...'
+                      : hasOtherRole
+                        ? `Switch to ${otherRole === 'client' ? 'Client' : 'Freelancer'}`
+                        : `Become a ${otherRole}`}
+                  </button>
+                )}
                 <Link href="/profile" className="navbar__avatar" id="nav-profile">
                   <span className="avatar avatar--sm">
                     {user.email?.[0]?.toUpperCase() || 'U'}

@@ -16,16 +16,14 @@ export async function GET(request) {
 
     if (!error) {
       if (wantsClient) {
-        // Only succeeds for brand-new accounts (see google_client_signup_migration.sql);
-        // existing freelancers keep their role
-        const { data: role, error: roleErr } = await supabase.rpc('claim_client_role')
+        // Adds client access (new or existing account) and switches to client mode —
+        // one account can be both (see dual_role_migration.sql)
+        const { error: roleErr } = await supabase.rpc('add_role', { new_role: 'client' })
         if (roleErr) {
-          console.error('[auth/callback] claim_client_role failed:', roleErr.message)
+          console.error('[auth/callback] add_role failed:', roleErr.message)
+          return NextResponse.redirect(`${origin}/dashboard`)
         }
-        if (role === 'client') {
-          return NextResponse.redirect(`${origin}/client`)
-        }
-        return NextResponse.redirect(`${origin}/dashboard?notice=already_freelancer`)
+        return NextResponse.redirect(`${origin}/client`)
       }
 
       return NextResponse.redirect(`${origin}${next}`)

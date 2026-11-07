@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useRole } from '@/lib/hooks/useRole'
+import AddRoleButton from '@/components/AddRoleButton/AddRoleButton'
 import './create.css'
 
 export default function CreateProjectPage() {
@@ -15,7 +16,7 @@ export default function CreateProjectPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const { role, loading: roleLoading } = useRole()
+  const { isClient, loading: roleLoading } = useRole()
 
   // Collectives the user belongs to — a project can optionally be posted for one
   useEffect(() => {
@@ -74,17 +75,19 @@ export default function CreateProjectPage() {
     )
   }
 
-  if (role !== 'client') {
+  if (!isClient) {
     return (
       <div className="create-project-page">
         <div className="container container--narrow">
           <div className="card create-project__blocked animate-fade-in-up">
             <div className="create-project__blocked-icon">💼</div>
-            <h1 className="create-project__title">Only clients can post projects</h1>
+            <h1 className="create-project__title">Posting projects needs client access</h1>
             <p className="create-project__subtitle">
-              Your account is a freelancer account. Browse open projects and pick one up with your collective instead.
+              Hiring for something? Add client access to this same account — same email,
+              same login. You can switch between client and freelancer from the top bar anytime.
             </p>
-            <Link href="/projects" className="btn btn--primary btn--lg">Browse Projects</Link>
+            <AddRoleButton role="client">Add client access</AddRoleButton>
+            <Link href="/projects" className="btn btn--ghost">Just browse projects</Link>
           </div>
         </div>
       </div>
