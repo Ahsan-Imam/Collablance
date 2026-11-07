@@ -45,7 +45,7 @@ export default function PrivacyPage() {
           <h2>3. Data Sharing</h2>
           <p>We share your data only with the following third parties, and only as necessary:</p>
           <ul>
-            <li><strong>Razorpay:</strong> For payment processing (governed by Razorpay's privacy policy)</li>
+            <li><strong>Razorpay:</strong> For payment processing (governed by Razorpay&apos;s privacy policy)</li>
             <li><strong>Supabase:</strong> For data storage and authentication (data stored securely)</li>
             <li><strong>Claude API (Anthropic):</strong> For AI-powered features (when launched in Phase 2)</li>
           </ul>
@@ -91,7 +91,7 @@ export default function PrivacyPage() {
         <div className="legal-section">
           <h2>7. DPDPA Compliance</h2>
           <div className="legal-highlight">
-            CollabLance is committed to full compliance with India's Digital Personal 
+            CollabLance is committed to full compliance with India&apos;s Digital Personal 
             Data Protection Act 2023 (DPDPA). We process personal data only with valid 
             consent, for legitimate purposes, and with appropriate security measures.
           </div>

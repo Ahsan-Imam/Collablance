@@ -60,7 +60,7 @@ export default function ProjectsPage() {
 
     fetch(`/api/projects?${params}`)
       .then(r => r.json())
-      .then(json => { setProjects(json.data || []); setLoading(false) })
+      .then(json => { setError(json.error || ''); setProjects(json.data || []); setLoading(false) })
       .catch(() => { setError('Failed to load projects'); setLoading(false) })
   }, [filter, search])
 

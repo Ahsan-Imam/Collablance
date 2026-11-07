@@ -74,7 +74,7 @@ export default function CreateCollectivePage() {
               placeholder="e.g. PixelForge Studios"
               value={formData.name} onChange={handleChange}
               required maxLength={60} />
-            <span className="input-hint">This is your team's public identity.</span>
+            <span className="input-hint">This is your team&apos;s public identity.</span>
           </div>
 
           <div className="input-group">

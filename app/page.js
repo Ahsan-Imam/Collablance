@@ -101,7 +101,7 @@ export default function HomePage() {
               <h3 className="feature-card__title">Reputation System</h3>
               <p className="feature-card__desc">
                 Build credibility through project ratings. 
-                Your collective's track record speaks louder than resumes.
+                Your collective&apos;s track record speaks louder than resumes.
               </p>
             </div>
             <div className="card card--hover feature-card" id="feature-chat">
@@ -123,7 +123,7 @@ export default function HomePage() {
             <span className="badge badge--primary">How It Works</span>
             <h2 className="section-title">Four steps to your first project</h2>
             <p className="section-subtitle">
-              From signup to payday, in less time than you'd think.
+              From signup to payday, in less time than you&apos;d think.
             </p>
           </div>
           <div className="steps">
@@ -185,7 +185,7 @@ export default function HomePage() {
             <div className="cta-card__content">
               <h2 className="cta-card__title">Ready to team up?</h2>
               <p className="cta-card__desc">
-                Join CollabLance today. It's free to start, and you only 
+                Join CollabLance today. It&apos;s free to start, and you only 
                 pay a small platform fee when you get paid.
               </p>
               <div className="cta-card__actions">

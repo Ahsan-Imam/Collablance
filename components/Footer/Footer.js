@@ -20,7 +20,7 @@ export default function Footer() {
               Form collectives. Pitch together. Get paid fairly.
             </p>
             <p className="footer__tagline footer__tagline--small">
-              India's platform for freelancer teams.
+              India&apos;s platform for freelancer teams.
             </p>
           </div>
 

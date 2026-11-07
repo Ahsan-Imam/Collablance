@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { escapeLike } from '@/lib/search'
 
 // GET /api/collectives — list all collectives (with member count)
 export async function GET(request) {
@@ -19,19 +20,21 @@ export async function GET(request) {
     .order('created_at', { ascending: false })
 
   if (mine && user) {
-    // return collectives the user owns OR is a member of
-    query = supabase
-      .from('collectives')
-      .select(`
-        id, name, description, focus_area, avatar_initial, is_public, owner_id, created_at,
-        collective_members!inner(user_id, role)
-      `)
-      .eq('collective_members.user_id', user.id)
-      .order('created_at', { ascending: false })
+    // Look up memberships first, then filter collectives by id — filtering on the
+    // embedded collective_members would also limit the member count to 1.
+    const { data: memberships, error: memErr } = await supabase
+      .from('collective_members')
+      .select('collective_id')
+      .eq('user_id', user.id)
+
+    if (memErr) return NextResponse.json({ error: memErr.message }, { status: 500 })
+    if (!memberships.length) return NextResponse.json({ data: [] })
+
+    query = query.in('id', memberships.map(m => m.collective_id))
   }
 
   if (search) {
-    query = query.ilike('name', `%${search}%`)
+    query = query.ilike('name', `%${escapeLike(search)}%`)
   }
 
   const { data, error } = await query
@@ -64,11 +67,13 @@ export async function POST(request) {
   if (collErr) return NextResponse.json({ error: collErr.message }, { status: 500 })
 
   // Auto-add creator as owner member
-  await supabase.from('collective_members').insert({
+  const { error: memberErr } = await supabase.from('collective_members').insert({
     collective_id: collective.id,
     user_id: user.id,
     role: 'owner',
   })
+
+  if (memberErr) return NextResponse.json({ error: memberErr.message }, { status: 500 })
 
   return NextResponse.json({ data: collective }, { status: 201 })
 }

@@ -223,6 +223,7 @@ export default function ContextPage() {
   const [searching, setSearching] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [currentUserId, setCurrentUserId] = useState(null)
+  const [error, setError] = useState('')
 
   // Load current user
   useEffect(() => {
@@ -231,34 +232,37 @@ export default function ContextPage() {
     })
   }, [])
 
-  // Fetch cards
+  // Fetch cards — returns the result instead of setting state, so effects can
+  // apply it asynchronously. Filter changes set `loading` in the click handler;
+  // realtime refreshes deliberately don't, so the skeleton doesn't flash.
   const fetchCards = useCallback(async () => {
-    setLoading(true)
     try {
       const params = new URLSearchParams()
       if (filter !== 'all') params.set('section', filter)
       const res = await fetch(`/api/context?${params}`)
       const json = await res.json()
-      setCards(json.data || [])
+      return { cards: json.data || [], error: json.error || '' }
     } catch {
-      setCards([])
-    } finally {
-      setLoading(false)
+      return { cards: [], error: 'Failed to load context cards' }
     }
   }, [filter])
 
   useEffect(() => {
-    fetchCards()
-  }, [fetchCards])
+    const apply = ({ cards, error }) => {
+      setCards(cards)
+      setError(error)
+      setLoading(false)
+    }
 
-  // Realtime subscription
-  useEffect(() => {
+    fetchCards().then(apply)
+
+    // Realtime subscription — refetch on any change
     const supabase = createClient()
     const channel = supabase
       .channel('team_context_realtime')
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'team_context' },
-        () => fetchCards()
+        () => fetchCards().then(apply)
       )
       .subscribe()
     return () => supabase.removeChannel(channel)
@@ -270,7 +274,12 @@ export default function ContextPage() {
   }
 
   const handleDelete = async (id) => {
-    await fetch(`/api/context/${id}`, { method: 'DELETE' })
+    const res = await fetch(`/api/context/${id}`, { method: 'DELETE' })
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}))
+      setError(json.error || 'Failed to delete card')
+      return
+    }
     setCards(prev => prev.filter(c => c.id !== id))
     if (searchResults) setSearchResults(prev => prev.filter(c => c.id !== id))
   }
@@ -282,6 +291,7 @@ export default function ContextPage() {
       body: JSON.stringify({ is_pinned: pinned }),
     })
     const json = await res.json()
+    if (json.error) setError(json.error)
     if (json.data) {
       setCards(prev => prev.map(c => c.id === id ? json.data : c)
         .sort((a, b) => (b.is_pinned - a.is_pinned) || new Date(b.updated_at) - new Date(a.updated_at))
@@ -291,11 +301,7 @@ export default function ContextPage() {
 
   // Semantic search — debounced 400ms
   useEffect(() => {
-    if (!search.trim()) {
-      setSearchResults(null)
-      setSearchMode(null)
-      return
-    }
+    if (!search.trim()) return
     const timer = setTimeout(async () => {
       setSearching(true)
       try {
@@ -305,6 +311,7 @@ export default function ContextPage() {
           body: JSON.stringify({ query: search.trim(), limit: 20 }),
         })
         const json = await res.json()
+        if (json.error) setError(json.error)
         setSearchResults(json.data || [])
         setSearchMode(json.mode || null)
       } catch {
@@ -341,7 +348,7 @@ export default function ContextPage() {
               </div>
               <h1 className="ctx-page__title">Team Context Board</h1>
               <p className="ctx-page__subtitle">
-                Share what you're building, your blockers, decisions, and perspective.
+                Share what you&apos;re building, your blockers, decisions, and perspective.
                 Your AI tools read this to stay in sync with the whole team.
               </p>
             </div>
@@ -386,7 +393,10 @@ export default function ContextPage() {
               <button
                 key={s.id}
                 className={`ctx-filter-tab ${filter === s.id ? 'ctx-filter-tab--active' : ''}`}
-                onClick={() => { setFilter(s.id); setSearch(''); setSearchResults(null) }}
+                onClick={() => {
+                  if (s.id !== filter) setLoading(true)
+                  setFilter(s.id); setSearch(''); setSearchResults(null); setSearchMode(null)
+                }}
                 style={{ '--sec-color': s.color }}
                 id={`filter-tab-${s.id}`}
               >
@@ -399,7 +409,10 @@ export default function ContextPage() {
               className="input ctx-search"
               placeholder="✨ Semantic search..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={e => {
+                setSearch(e.target.value)
+                if (!e.target.value.trim()) { setSearchResults(null); setSearchMode(null) }
+              }}
               id="context-search"
             />
             {searching && <span className="ctx-search-spin">⟳</span>}
@@ -410,6 +423,8 @@ export default function ContextPage() {
             )}
           </div>
         </div>
+
+        {error && <div className="alert alert--error" style={{ marginBottom: '1rem' }}>⚠️ {error}</div>}
 
         {/* Cards */}
         {loading ? (

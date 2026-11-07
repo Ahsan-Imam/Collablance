@@ -157,7 +157,7 @@ function LoginForm() {
 
       <div className="auth-card__footer">
         <p>
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/auth/signup" className="auth-card__link" id="login-to-signup">
             Sign up as a Freelancer
           </Link>

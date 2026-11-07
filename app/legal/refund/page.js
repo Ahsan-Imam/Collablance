@@ -45,7 +45,7 @@ export default function RefundPage() {
           <ul>
             <li>Completed and approved milestones are <strong>not refundable</strong></li>
             <li>The current in-progress milestone is refunded based on the <strong>completion percentage</strong> as agreed by both parties</li>
-            <li>Future milestones that haven't started are <strong>fully refundable</strong></li>
+            <li>Future milestones that haven&apos;t started are <strong>fully refundable</strong></li>
             <li>If parties cannot agree on completion percentage, the <a href="/legal/disputes">dispute resolution process</a> applies</li>
           </ul>
         </div>

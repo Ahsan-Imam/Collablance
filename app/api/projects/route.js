@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { escapeLike } from '@/lib/search'
 
 // GET /api/projects — list projects (with filters)
 export async function GET(request) {
@@ -24,7 +25,7 @@ export async function GET(request) {
   if (status && status !== 'all') query = query.eq('status', status)
   if (collectiveId) query = query.eq('collective_id', collectiveId)
   if (mine && user) query = query.eq('owner_id', user.id)
-  if (search) query = query.ilike('title', `%${search}%`)
+  if (search) query = query.ilike('title', `%${escapeLike(search)}%`)
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

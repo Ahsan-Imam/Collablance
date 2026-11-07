@@ -19,6 +19,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
   const [profile, setProfile] = useState({
     full_name: '',
     bio: '',
@@ -35,27 +36,31 @@ export default function ProfilePage() {
     const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user)
-      if (user) {
-        // Load from profiles table
-        fetch('/api/profile')
-          .then(r => r.json())
-          .then(json => {
-            if (json.data) {
-              const d = json.data
-              setProfile(prev => ({
-                ...prev,
-                full_name:        d.full_name        || '',
-                bio:              d.bio              || '',
-                skills:           d.skills           || [],
-                hourly_rate:      d.hourly_rate      || '',
-                location:         d.location         || '',
-                portfolio_url:    d.portfolio_url    || '',
-                experience_years: d.experience_years || '',
-              }))
-            }
-          })
+      if (!user) {
+        setLoading(false)
+        return
       }
-      setLoading(false)
+      // Load from profiles table
+      fetch('/api/profile')
+        .then(r => r.json())
+        .then(json => {
+          if (json.error) setError(json.error)
+          if (json.data) {
+            const d = json.data
+            setProfile(prev => ({
+              ...prev,
+              full_name:        d.full_name        || '',
+              bio:              d.bio              || '',
+              skills:           d.skills           || [],
+              hourly_rate:      d.hourly_rate      || '',
+              location:         d.location         || '',
+              portfolio_url:    d.portfolio_url    || '',
+              experience_years: d.experience_years || '',
+            }))
+          }
+        })
+        .catch(() => setError('Failed to load profile'))
+        .finally(() => setLoading(false))
     })
   }, [])
 
@@ -81,6 +86,7 @@ export default function ProfilePage() {
   const handleSave = async (e) => {
     e.preventDefault()
     setSaving(true)
+    setError('')
     try {
       const res = await fetch('/api/profile', {
         method: 'POST',
@@ -92,7 +98,7 @@ export default function ProfilePage() {
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {
-      console.error('Profile save error:', err.message)
+      setError(err.message || 'Failed to save profile')
     } finally {
       setSaving(false)
     }
@@ -127,6 +133,8 @@ export default function ProfilePage() {
             </p>
           </div>
         </div>
+
+        {error && <div className="alert alert--error">{error}</div>}
 
         <form onSubmit={handleSave} className="profile-form card animate-fade-in-up" style={{ animationDelay: '100ms' }} id="profile-form">
           <div className="profile-form__grid">

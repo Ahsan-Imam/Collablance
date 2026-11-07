@@ -11,6 +11,7 @@ export default function DashboardPage() {
   const [recentCollectives, setRecentCollectives] = useState([])
   const [recentProjects, setRecentProjects] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     const supabase = createClient()
@@ -24,9 +25,10 @@ export default function DashboardPage() {
           setRecentCollectives(json.data.collectives.slice(0, 3))
           setRecentProjects(json.data.projects.slice(0, 3))
         }
+        if (json.error) setError(json.error)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch(() => { setError('Failed to load dashboard'); setLoading(false) })
   }, [])
 
   if (loading) {
@@ -59,13 +61,15 @@ export default function DashboardPage() {
               Welcome back, <span className="dashboard__name">{userName}</span>
             </h1>
             <p className="dashboard__subtitle">
-              Here's what's happening with your collectives and projects.
+              Here&apos;s what&apos;s happening with your collectives and projects.
             </p>
           </div>
           <Link href="/profile" className="btn btn--secondary" id="dash-edit-profile">
             Edit Profile
           </Link>
         </div>
+
+        {error && <div className="alert alert--error">{error}</div>}
 
         {/* Quick Stats */}
         <div className="dashboard__stats stagger-children">
@@ -123,7 +127,7 @@ export default function DashboardPage() {
               <div className="action-card__icon">🔍</div>
               <div className="action-card__content">
                 <h3 className="action-card__title">Browse Projects</h3>
-                <p className="action-card__desc">Find projects that match your team's skills</p>
+                <p className="action-card__desc">Find projects that match your team&apos;s skills</p>
               </div>
               <span className="action-card__arrow">→</span>
             </Link>
@@ -142,13 +146,13 @@ export default function DashboardPage() {
           ) : (
             <div className="dashboard__activity">
               {recentCollectives.map(m => (
-                <a key={m.collective_id} href={`/collectives/${m.collective_id}`} className="activity-item">
+                <Link key={m.collective_id} href={`/collectives/${m.collective_id}`} className="activity-item">
                   <span className="activity-item__icon">👥</span>
                   <span className="activity-item__text">
                     <strong>{m.collectives?.name}</strong> — {m.role}
                   </span>
                   <span className="activity-item__arrow">→</span>
-                </a>
+                </Link>
               ))}
               {recentProjects.map(p => (
                 <div key={p.id} className="activity-item">

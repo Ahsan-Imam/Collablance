@@ -35,7 +35,7 @@ export default function IPPage() {
         </div>
 
         <div className="legal-section">
-          <h2>3. CollabLance's Position</h2>
+          <h2>3. CollabLance&apos;s Position</h2>
           <div className="legal-highlight">
             CollabLance claims no ownership over any work created on the platform. 
             We are a facilitator, not a rights holder. All IP rights transfer 

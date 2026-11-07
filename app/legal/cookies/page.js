@@ -51,7 +51,7 @@ export default function CookiesPage() {
           <div className="legal-highlight">
             We use privacy-friendly analytics only (such as Plausible or Umami). 
             We do not use Google Analytics. Analytics cookies are loaded only if 
-            you choose "Accept All" on our cookie consent banner.
+            you choose &quot;Accept All&quot; on our cookie consent banner.
           </div>
 
           <h3>Advertising / Tracking Cookies</h3>
@@ -66,9 +66,9 @@ export default function CookiesPage() {
           <h2>3. Cookie Consent</h2>
           <ul>
             <li>On your first visit, a cookie consent banner appears</li>
-            <li>You can choose <strong>"Accept All"</strong> (essential + analytics) or <strong>"Essential Only"</strong></li>
+            <li>You can choose <strong>&quot;Accept All&quot;</strong> (essential + analytics) or <strong>&quot;Essential Only&quot;</strong></li>
             <li>Both options are equally visible — no dark patterns</li>
-            <li>Your choice is stored in your browser's localStorage</li>
+            <li>Your choice is stored in your browser&apos;s localStorage</li>
             <li>You can change your preference at any time in your account settings</li>
           </ul>
         </div>
