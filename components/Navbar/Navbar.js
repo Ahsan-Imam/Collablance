@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import './Navbar.css'
 
@@ -10,7 +10,16 @@ export default function Navbar() {
   const [user, setUser] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [lastPathname, setLastPathname] = useState(null)
   const pathname = usePathname()
+  const router = useRouter()
+
+  // Close the mobile menu on navigation (adjusting state during render
+  // avoids the extra render pass a setState-in-effect would cause)
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname)
+    setMenuOpen(false)
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -34,15 +43,12 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  useEffect(() => {
-    setMenuOpen(false)
-  }, [pathname])
-
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
     setUser(null)
-    window.location.href = '/'
+    router.push('/')
+    router.refresh()
   }
 
   const isActive = (path) => pathname === path || pathname.startsWith(path + '/')

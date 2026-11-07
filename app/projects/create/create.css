@@ -1,0 +1,50 @@
+.create-project-page {
+  padding: var(--space-2xl) 0;
+}
+
+.create-project__header {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+}
+
+.create-project__title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--cl-text);
+}
+
+.create-project__subtitle {
+  font-size: 0.9375rem;
+  color: var(--cl-text-secondary);
+  margin-top: var(--space-xs);
+}
+
+.create-project__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.create-project__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-lg);
+}
+
+.create-project__form select.input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.create-project__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--cl-border-light);
+}

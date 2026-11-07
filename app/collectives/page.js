@@ -42,6 +42,7 @@ export default function CollectivesPage() {
     fetch('/api/collectives?mine=true')
       .then(r => r.json())
       .then(json => {
+        if (json.error) setError(json.error)
         setCollectives(json.data || [])
         setLoading(false)
       })

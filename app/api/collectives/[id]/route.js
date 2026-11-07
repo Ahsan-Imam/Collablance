@@ -8,16 +8,27 @@ export async function GET(request, { params }) {
 
   const { data, error } = await supabase
     .from('collectives')
-    .select(`
-      *,
-      collective_members(user_id, role, joined_at,
-        profiles(id, full_name, avatar_url, skills, hourly_rate, location)
-      )
-    `)
+    .select('*, collective_members(user_id, role, joined_at)')
     .eq('id', id)
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 404 })
+
+  // collective_members.user_id references auth.users, not profiles, so PostgREST
+  // can't embed profiles directly — fetch them separately and attach.
+  const userIds = data.collective_members.map(m => m.user_id)
+  if (userIds.length) {
+    const { data: profiles, error: profErr } = await supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url, skills, hourly_rate, location')
+      .in('id', userIds)
+
+    if (profErr) return NextResponse.json({ error: profErr.message }, { status: 500 })
+
+    const byId = Object.fromEntries(profiles.map(p => [p.id, p]))
+    data.collective_members = data.collective_members.map(m => ({ ...m, profiles: byId[m.user_id] || null }))
+  }
+
   return NextResponse.json({ data })
 }
 
@@ -44,7 +55,7 @@ export async function PATCH(request, { params }) {
     .eq('id', id)
     .eq('owner_id', user.id)
     .select()
-    .single()
+    .maybeSingle()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   if (!data) return NextResponse.json({ error: 'Not found or not authorized' }, { status: 404 })

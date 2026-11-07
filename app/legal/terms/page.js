@@ -87,7 +87,7 @@ export default function TermsPage() {
             <li>Attempting to circumvent the escrow or payment system</li>
             <li>Spamming, phishing, or distributing malware</li>
             <li>Manipulating ratings or reviews</li>
-            <li>Sharing another member's private information without consent</li>
+            <li>Sharing another member&apos;s private information without consent</li>
             <li>Using the platform for money laundering or illegal financial activities</li>
           </ul>
         </div>
@@ -133,7 +133,7 @@ export default function TermsPage() {
           <h2>11. Limitation of Liability</h2>
           <p>
             CollabLance is not liable for disputes between members beyond the 
-            platform's dispute resolution process. The platform acts as a facilitator 
+            platform&apos;s dispute resolution process. The platform acts as a facilitator 
             and marketplace — not a party to agreements between freelancers and clients.
           </p>
         </div>

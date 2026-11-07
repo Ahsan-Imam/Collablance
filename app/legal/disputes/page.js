@@ -71,7 +71,7 @@ export default function DisputesPage() {
           <ul>
             <li>If the dispute remains unresolved after Step 3, either party may request binding arbitration</li>
             <li>Arbitration is conducted under Indian arbitration law</li>
-            <li>The arbitrator's decision is final and binding on both parties</li>
+            <li>The arbitrator&apos;s decision is final and binding on both parties</li>
             <li>Arbitration costs are shared equally unless the arbitrator decides otherwise</li>
           </ul>
         </div>
@@ -79,7 +79,7 @@ export default function DisputesPage() {
         <div className="legal-section">
           <h2>Platform Ruling Finality</h2>
           <div className="legal-highlight">
-            CollabLance's ruling (Step 2 or Step 3) is final for platform purposes. 
+            CollabLance&apos;s ruling (Step 2 or Step 3) is final for platform purposes. 
             This means it determines how escrowed funds are distributed on the platform. 
             Either party retains the right to pursue external legal action, but the 
             platform ruling stands regardless of external proceedings.

@@ -32,6 +32,11 @@ export async function GET() {
       .single(),
   ])
 
+  // A missing profile row (PGRST116) is fine — anything else is a real failure
+  const failed = collectivesRes.error || projectsRes.error ||
+    (profileRes.error?.code !== 'PGRST116' && profileRes.error)
+  if (failed) return NextResponse.json({ error: failed.message }, { status: 500 })
+
   return NextResponse.json({
     data: {
       collectives: collectivesRes.data || [],

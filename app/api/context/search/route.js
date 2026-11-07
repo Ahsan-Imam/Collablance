@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { generateQueryEmbedding } from '@/lib/embeddings'
 import { NextResponse } from 'next/server'
+import { sanitizeForOrFilter } from '@/lib/search'
 
 /**
  * POST /api/context/search
@@ -40,7 +41,10 @@ export async function POST(request) {
   }
 
   // Fallback: full-text keyword search across title + content
-  const q = `%${query.trim()}%`
+  const safe = sanitizeForOrFilter(query)
+  if (!safe) return NextResponse.json({ data: [], mode: 'text', query })
+
+  const q = `%${safe}%`
   const { data, error } = await supabase
     .from('team_context')
     .select('id,user_id,display_name,avatar_initial,section,title,content,tags,is_pinned,collective_id,project_id,updated_at,created_at')
