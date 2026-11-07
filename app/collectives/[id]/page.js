@@ -159,12 +159,12 @@ export default function CollectiveDetailPage() {
           ) : (
             <div className="member-list">
               {projects.map(p => (
-                <div key={p.id} className="card member-item">
+                <Link key={p.id} href={`/projects/${p.id}`} className="card member-item">
                   <div className="member-item__info">
                     <span className="member-item__name">{p.title}</span>
                     <span className="member-item__sub">{p.status.replace('_', ' ')}</span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

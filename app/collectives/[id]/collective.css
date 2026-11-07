@@ -96,3 +96,12 @@
   font-size: 0.8125rem;
   color: var(--cl-text-secondary);
 }
+
+a.member-item {
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+a.member-item:hover {
+  border-color: var(--cl-primary-200);
+  box-shadow: var(--shadow-lg);
+}

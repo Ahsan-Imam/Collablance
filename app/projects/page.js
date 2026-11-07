@@ -15,7 +15,7 @@ function ProjectCard({ project }) {
       : 'Budget TBD'
 
   return (
-    <div className="project-card animate-fade-in-up" id={`project-${project.id}`}>
+    <Link href={`/projects/${project.id}`} className="project-card animate-fade-in-up" id={`project-${project.id}`}>
       <div className="project-card__header">
         <h3 className="project-card__title">{project.title}</h3>
         <span className="project-card__status" style={{ color: STATUS_COLORS[project.status] }}>
@@ -42,7 +42,7 @@ function ProjectCard({ project }) {
           )}
         </div>
       )}
-    </div>
+    </Link>
   )
 }
 
