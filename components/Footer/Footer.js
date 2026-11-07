@@ -32,6 +32,7 @@ export default function Footer() {
               <li><Link href="/collectives" id="footer-collectives">Collectives</Link></li>
               <li><Link href="/projects" id="footer-projects">Browse Projects</Link></li>
               <li><Link href="/#features" id="footer-features">Features</Link></li>
+              <li><Link href="/for-clients" id="footer-for-clients">For Clients</Link></li>
             </ul>
           </div>
 

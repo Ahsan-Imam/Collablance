@@ -38,6 +38,17 @@ export async function POST(request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // Only clients post projects (also enforced by the projects insert RLS policy)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (profile?.role !== 'client') {
+    return NextResponse.json({ error: 'Only client accounts can post projects.' }, { status: 403 })
+  }
+
   const body = await request.json()
   const { title, description, budget_min, budget_max, currency, skills_needed, deadline, collective_id } = body
 

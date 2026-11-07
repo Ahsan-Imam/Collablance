@@ -396,3 +396,18 @@
     margin-left: 19px;
   }
 }
+
+.hero__client-link {
+  margin-top: var(--space-lg);
+  font-size: 0.9375rem;
+  color: var(--cl-text-secondary);
+}
+
+.hero__client-link a {
+  color: var(--cl-primary-600);
+  font-weight: 600;
+}
+
+.hero__client-link a:hover {
+  text-decoration: underline;
+}

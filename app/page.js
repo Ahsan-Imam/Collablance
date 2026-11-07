@@ -34,6 +34,9 @@ export default function HomePage() {
               See How It Works
             </Link>
           </div>
+          <p className="hero__client-link animate-fade-in-up" style={{ animationDelay: '250ms' }}>
+            Hiring instead? <Link href="/for-clients" id="hero-for-clients">Post a project for collectives →</Link>
+          </p>
           <div className="hero__stats animate-fade-in-up" style={{ animationDelay: '300ms' }}>
             <div className="hero__stat">
               <span className="hero__stat-number">3-5%</span>

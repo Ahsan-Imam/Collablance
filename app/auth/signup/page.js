@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import '../auth.css'
 
@@ -17,13 +17,16 @@ function GoogleIcon() {
   )
 }
 
-export default function SignupPage() {
+function SignupForm() {
+  const searchParams = useSearchParams()
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
   })
+  // /auth/signup?role=client (from the For Clients page) pre-selects Client
+  const [role, setRole] = useState(() => searchParams.get('role') === 'client' ? 'client' : 'freelancer')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
@@ -83,7 +86,8 @@ export default function SignupPage() {
         options: {
           data: {
             full_name: formData.fullName,
-            role: 'freelancer', // Phase 1: Freelancer signup only
+            // Copied into profiles.role by the handle_new_user trigger, then locked
+            role,
           },
         },
       })
@@ -135,9 +139,31 @@ export default function SignupPage() {
         <div className="auth-card__header">
           <h1 className="auth-card__title">Join CollabLance</h1>
           <p className="auth-card__subtitle">
-            Create your freelancer account — it&apos;s free
+            Create your {role} account — it&apos;s free
           </p>
         </div>
+
+        <div className="auth-role" role="radiogroup" aria-label="Account type">
+          {[
+            { value: 'freelancer', icon: '🧑‍💻', title: 'Freelancer', desc: 'Join collectives and work on projects' },
+            { value: 'client', icon: '💼', title: 'Client', desc: 'Post projects and hire collectives' },
+          ].map(opt => (
+            <button
+              key={opt.value}
+              type="button"
+              role="radio"
+              aria-checked={role === opt.value}
+              className={`auth-role__option ${role === opt.value ? 'auth-role__option--active' : ''}`}
+              onClick={() => setRole(opt.value)}
+              id={`signup-role-${opt.value}`}
+            >
+              <span className="auth-role__icon">{opt.icon}</span>
+              <span className="auth-role__title">{opt.title}</span>
+              <span className="auth-role__desc">{opt.desc}</span>
+            </button>
+          ))}
+        </div>
+        <p className="auth-role__hint">You can&apos;t change this later.</p>
 
         {error && (
           <div className="alert alert--error" id="signup-error">
@@ -146,26 +172,31 @@ export default function SignupPage() {
           </div>
         )}
 
-        {/* Google Sign-Up */}
-        <button
-          onClick={handleGoogleSignup}
-          className="btn btn--google btn--full"
-          disabled={googleLoading}
-          id="google-signup"
-        >
-          {googleLoading ? (
-            'Redirecting to Google...'
-          ) : (
-            <>
-              <GoogleIcon />
-              Continue with Google
-            </>
-          )}
-        </button>
+        {/* Google Sign-Up — OAuth can't pass the role choice, so Google
+            accounts are always freelancers; clients sign up with email */}
+        {role === 'freelancer' && (
+          <>
+            <button
+              onClick={handleGoogleSignup}
+              className="btn btn--google btn--full"
+              disabled={googleLoading}
+              id="google-signup"
+            >
+              {googleLoading ? (
+                'Redirecting to Google...'
+              ) : (
+                <>
+                  <GoogleIcon />
+                  Continue with Google
+                </>
+              )}
+            </button>
 
-        <div className="auth-form__divider">
-          <span>or sign up with email</span>
-        </div>
+            <div className="auth-form__divider">
+              <span>or sign up with email</span>
+            </div>
+          </>
+        )}
 
         <form onSubmit={handleSignup} className="auth-form" id="signup-form">
           <div className="input-group">
@@ -241,7 +272,7 @@ export default function SignupPage() {
             disabled={loading}
             id="signup-submit"
           >
-            {loading ? 'Creating account...' : 'Create Freelancer Account'}
+            {loading ? 'Creating account...' : `Create ${role === 'client' ? 'Client' : 'Freelancer'} Account`}
           </button>
         </form>
 
@@ -255,5 +286,13 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
   )
 }

@@ -2,49 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRole } from '@/lib/hooks/useRole'
+import ProjectCard from '@/components/ProjectCard/ProjectCard'
 import './projects.css'
 
-const STATUS_LABELS = { all: 'All', open: 'Open', in_progress: 'In Progress', completed: 'Completed' }
-const STATUS_COLORS = { open: '#059669', in_progress: '#d97706', completed: '#6366f1', cancelled: '#dc2626' }
-
-function ProjectCard({ project }) {
-  const budgetStr = project.budget_min && project.budget_max
-    ? `₹${Number(project.budget_min).toLocaleString()} – ₹${Number(project.budget_max).toLocaleString()}`
-    : project.budget_min
-      ? `From ₹${Number(project.budget_min).toLocaleString()}`
-      : 'Budget TBD'
-
-  return (
-    <Link href={`/projects/${project.id}`} className="project-card animate-fade-in-up" id={`project-${project.id}`}>
-      <div className="project-card__header">
-        <h3 className="project-card__title">{project.title}</h3>
-        <span className="project-card__status" style={{ color: STATUS_COLORS[project.status] }}>
-          ● {STATUS_LABELS[project.status] || project.status}
-        </span>
-      </div>
-      <p className="project-card__desc">{project.description}</p>
-      <div className="project-card__meta">
-        <span className="project-card__budget">💰 {budgetStr}</span>
-        {project.deadline && (
-          <span className="project-card__deadline">📅 {new Date(project.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
-        )}
-        {project.collectives?.name && (
-          <span className="badge badge--neutral">👥 {project.collectives.name}</span>
-        )}
-      </div>
-      {project.skills_needed?.length > 0 && (
-        <div className="project-card__skills">
-          {project.skills_needed.slice(0, 4).map(s => (
-            <span key={s} className="badge badge--neutral" style={{ fontSize: '0.7rem' }}>{s}</span>
-          ))}
-          {project.skills_needed.length > 4 && (
-            <span className="badge badge--neutral" style={{ fontSize: '0.7rem' }}>+{project.skills_needed.length - 4}</span>
-          )}
-        </div>
-      )}
-    </Link>
-  )
-}
+const FILTER_LABELS = { all: 'All', open: 'Open', in_progress: 'In Progress', completed: 'Completed' }
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([])
@@ -52,6 +14,8 @@ export default function ProjectsPage() {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
   const [error, setError] = useState('')
+  const { role } = useRole()
+  const isClient = role === 'client'
 
   useEffect(() => {
     const params = new URLSearchParams()
@@ -70,11 +34,15 @@ export default function ProjectsPage() {
         <div className="projects-page__header animate-fade-in-up">
           <div>
             <h1 className="projects-page__title">Projects</h1>
-            <p className="projects-page__subtitle">Browse available projects or post one for your collective.</p>
+            <p className="projects-page__subtitle">
+              {isClient ? 'Browse projects or post a new one for collectives to pick up.' : 'Browse projects open to your collective.'}
+            </p>
           </div>
-          <Link href="/projects/create" className="btn btn--primary" id="create-project-btn">
-            + Post Project
-          </Link>
+          {isClient && (
+            <Link href="/projects/create" className="btn btn--primary" id="create-project-btn">
+              + Post Project
+            </Link>
+          )}
         </div>
 
         <div className="projects-page__filters animate-fade-in-up" style={{ animationDelay: '100ms' }}>
@@ -83,7 +51,7 @@ export default function ProjectsPage() {
             value={search} onChange={(e) => { setSearch(e.target.value); setLoading(true) }}
             id="project-search" />
           <div className="projects-page__filter-tabs">
-            {Object.entries(STATUS_LABELS).map(([val, label]) => (
+            {Object.entries(FILTER_LABELS).map(([val, label]) => (
               <button key={val}
                 className={`filter-tab ${filter === val ? 'filter-tab--active' : ''}`}
                 onClick={() => { setFilter(val); setLoading(true) }}
@@ -109,11 +77,13 @@ export default function ProjectsPage() {
             <p className="projects-empty__desc">
               {search || filter !== 'all'
                 ? 'Try clearing your filters.'
-                : 'Be the first to post a project!'}
+                : isClient ? 'Be the first to post a project!' : 'Check back soon — clients post new projects here.'}
             </p>
-            <Link href="/projects/create" className="btn btn--primary btn--lg" id="empty-create-project">
-              Post Your First Project
-            </Link>
+            {isClient && (
+              <Link href="/projects/create" className="btn btn--primary btn--lg" id="empty-create-project">
+                Post Your First Project
+              </Link>
+            )}
           </div>
         ) : (
           <div className="projects-grid">

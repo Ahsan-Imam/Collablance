@@ -31,6 +31,9 @@ export async function GET(request) {
     if (!memberships.length) return NextResponse.json({ data: [] })
 
     query = query.in('id', memberships.map(m => m.collective_id))
+  } else {
+    // Browsing (e.g. clients looking for a team) only lists public collectives
+    query = query.eq('is_public', true)
   }
 
   if (search) {

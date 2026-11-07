@@ -8,6 +8,7 @@ import './Navbar.css'
 
 export default function Navbar() {
   const [user, setUser] = useState(null)
+  const [role, setRole] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [lastPathname, setLastPathname] = useState(null)
@@ -36,6 +37,18 @@ export default function Navbar() {
 
     return () => subscription.unsubscribe()
   }, [])
+
+  // Look up the locked role whenever the signed-in user changes
+  const userId = user?.id
+  useEffect(() => {
+    if (!userId) return
+    createClient()
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .maybeSingle()
+      .then(({ data }) => setRole(data?.role || 'freelancer'))
+  }, [userId])
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10)
@@ -66,19 +79,29 @@ export default function Navbar() {
         <nav className={`navbar__nav ${menuOpen ? 'navbar__nav--open' : ''}`} id="main-nav">
           {user ? (
             <>
-              <Link
-                href="/dashboard"
-                className={`navbar__link ${isActive('/dashboard') ? 'navbar__link--active' : ''}`}
-                id="nav-dashboard"
-              >
-                Dashboard
-              </Link>
+              {role === 'client' ? (
+                <Link
+                  href="/client"
+                  className={`navbar__link ${isActive('/client') ? 'navbar__link--active' : ''}`}
+                  id="nav-client"
+                >
+                  Client Hub
+                </Link>
+              ) : (
+                <Link
+                  href="/dashboard"
+                  className={`navbar__link ${isActive('/dashboard') ? 'navbar__link--active' : ''}`}
+                  id="nav-dashboard"
+                >
+                  Dashboard
+                </Link>
+              )}
               <Link
                 href="/collectives"
                 className={`navbar__link ${isActive('/collectives') ? 'navbar__link--active' : ''}`}
                 id="nav-collectives"
               >
-                Collectives
+                {role === 'client' ? 'Find Collectives' : 'Collectives'}
               </Link>
               <Link
                 href="/projects"
@@ -119,6 +142,13 @@ export default function Navbar() {
               </Link>
               <Link href="/#how-it-works" className="navbar__link" id="nav-how">
                 How it Works
+              </Link>
+              <Link
+                href="/for-clients"
+                className={`navbar__link ${isActive('/for-clients') ? 'navbar__link--active' : ''}`}
+                id="nav-for-clients"
+              >
+                For Clients
               </Link>
               <div className="navbar__actions">
                 <Link href="/auth/login" className="btn btn--ghost btn--sm" id="nav-login">

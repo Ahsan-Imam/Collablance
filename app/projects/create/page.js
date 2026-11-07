@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { useRole } from '@/lib/hooks/useRole'
 import './create.css'
 
 export default function CreateProjectPage() {
@@ -13,6 +15,7 @@ export default function CreateProjectPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { role, loading: roleLoading } = useRole()
 
   // Collectives the user belongs to — a project can optionally be posted for one
   useEffect(() => {
@@ -53,12 +56,39 @@ export default function CreateProjectPage() {
       const json = await res.json()
       if (!res.ok) throw new Error(json.error)
 
-      router.push('/projects')
+      router.push('/client')
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (roleLoading) {
+    return (
+      <div className="create-project-page">
+        <div className="container container--narrow">
+          <div className="skeleton" style={{ height: 400, borderRadius: 16 }} />
+        </div>
+      </div>
+    )
+  }
+
+  if (role !== 'client') {
+    return (
+      <div className="create-project-page">
+        <div className="container container--narrow">
+          <div className="card create-project__blocked animate-fade-in-up">
+            <div className="create-project__blocked-icon">💼</div>
+            <h1 className="create-project__title">Only clients can post projects</h1>
+            <p className="create-project__subtitle">
+              Your account is a freelancer account. Browse open projects and pick one up with your collective instead.
+            </p>
+            <Link href="/projects" className="btn btn--primary btn--lg">Browse Projects</Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
