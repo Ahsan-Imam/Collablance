@@ -155,12 +155,13 @@ export default function DashboardPage() {
                 </Link>
               ))}
               {recentProjects.map(p => (
-                <div key={p.id} className="activity-item">
+                <Link key={p.id} href={`/projects/${p.id}`} className="activity-item">
                   <span className="activity-item__icon">📋</span>
                   <span className="activity-item__text">
                     <strong>{p.title}</strong> — {p.status}
                   </span>
-                </div>
+                  <span className="activity-item__arrow">→</span>
+                </Link>
               ))}
             </div>
           )}
