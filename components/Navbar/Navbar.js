@@ -144,11 +144,11 @@ export default function Navbar() {
                 How it Works
               </Link>
               <Link
-                href="/for-clients"
-                className={`navbar__link ${isActive('/for-clients') ? 'navbar__link--active' : ''}`}
-                id="nav-for-clients"
+                href="/for-freelancers"
+                className={`navbar__link ${isActive('/for-freelancers') ? 'navbar__link--active' : ''}`}
+                id="nav-for-freelancers"
               >
-                For Clients
+                For Freelancers
               </Link>
               <div className="navbar__actions">
                 <Link href="/auth/login" className="btn btn--ghost btn--sm" id="nav-login">
