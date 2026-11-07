@@ -38,15 +38,15 @@ export async function POST(request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Only clients post projects (also enforced by the projects insert RLS policy)
+  // Posting needs client access (also enforced by the projects insert RLS policy)
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('is_client')
     .eq('id', user.id)
     .maybeSingle()
 
-  if (profile?.role !== 'client') {
-    return NextResponse.json({ error: 'Only client accounts can post projects.' }, { status: 403 })
+  if (!profile?.is_client) {
+    return NextResponse.json({ error: 'Add client access to your account to post projects.' }, { status: 403 })
   }
 
   const body = await request.json()
