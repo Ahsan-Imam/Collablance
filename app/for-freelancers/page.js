@@ -19,9 +19,6 @@ export default function ForFreelancersPage() {
           <div className="hero__grid-pattern" />
         </div>
         <div className="container hero__content">
-          <div className="hero__badge animate-fade-in">
-            <span className="badge badge--primary">🇮🇳 Made for India</span>
-          </div>
           <h1 className="hero__title animate-fade-in-up">
             Freelancers are stronger
             <span className="hero__title-gradient"> together</span>

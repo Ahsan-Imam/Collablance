@@ -19,9 +19,6 @@ export default function HomePage() {
           <div className="hero__grid-pattern" />
         </div>
         <div className="container hero__content">
-          <div className="hero__badge animate-fade-in">
-            <span className="badge badge--accent">💼 For Clients</span>
-          </div>
           <h1 className="hero__title animate-fade-in-up">
             Hire a whole team,
             <span className="hero__title-gradient"> not just a freelancer</span>
