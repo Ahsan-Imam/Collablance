@@ -37,6 +37,19 @@ export async function GET() {
     (profileRes.error?.code !== 'PGRST116' && profileRes.error)
   if (failed) return NextResponse.json({ error: failed.message }, { status: 500 })
 
+  const collectiveIds = (collectivesRes.data || []).map(c => c.collective_id)
+  let avgRating = null
+  if (collectiveIds.length) {
+    const { data: ratingRows } = await supabase
+      .from('reviews')
+      .select('rating')
+      .eq('direction', 'client_to_team')
+      .in('collective_id', collectiveIds)
+    if (ratingRows?.length) {
+      avgRating = ratingRows.reduce((sum, r) => sum + r.rating, 0) / ratingRows.length
+    }
+  }
+
   return NextResponse.json({
     data: {
       collectives: collectivesRes.data || [],
@@ -45,8 +58,8 @@ export async function GET() {
       stats: {
         collective_count: collectivesRes.data?.length || 0,
         active_projects: (projectsRes.data || []).filter(p => p.status === 'in_progress' || p.status === 'open').length,
-        total_earnings: 0, // Phase 2: from payments table
-        avg_rating: null,  // Phase 2: from reviews table
+        total_earnings: 0,  // pending: Razorpay payments integration
+        avg_rating: avgRating,
       },
     }
   })

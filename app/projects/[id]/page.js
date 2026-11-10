@@ -33,6 +33,108 @@ function Fact({ label, children }) {
   )
 }
 
+const MILESTONE_STATUS_LABELS = { pending: 'Pending', submitted: 'Submitted', approved: 'Approved', paid: 'Paid', disputed: 'Disputed' }
+const MILESTONE_STATUS_COLORS = { pending: '#6b7280', submitted: '#d97706', approved: '#059669', paid: '#6366f1', disputed: '#dc2626' }
+
+function Stars({ value }) {
+  return <span aria-label={`${value} out of 5 stars`}>{'★'.repeat(value)}{'☆'.repeat(5 - value)}</span>
+}
+
+function MilestoneForm({ projectId, onAdd, onCancel }) {
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [amount, setAmount] = useState('')
+  const [dueDate, setDueDate] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/projects/${projectId}/milestones`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title.trim(), description: description.trim(), amount, due_date: dueDate || null }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      onAdd(json.data)
+    } catch (err) {
+      setError(err.message || 'Failed to add milestone')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="card" style={{ padding: 'var(--space-lg)', marginBottom: 'var(--space-md)' }}>
+      {error && <div className="alert alert--error" style={{ marginBottom: '0.75rem' }}>⚠️ {error}</div>}
+      <div className="input-group" style={{ marginBottom: '0.75rem' }}>
+        <label className="input-label" htmlFor="ms-title">Title</label>
+        <input id="ms-title" className="input" value={title} onChange={e => setTitle(e.target.value)} required />
+      </div>
+      <div className="input-group" style={{ marginBottom: '0.75rem' }}>
+        <label className="input-label" htmlFor="ms-desc">Description</label>
+        <textarea id="ms-desc" className="input textarea" rows={2} value={description} onChange={e => setDescription(e.target.value)} />
+      </div>
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
+        <div className="input-group" style={{ flex: 1 }}>
+          <label className="input-label" htmlFor="ms-amount">Amount (₹)</label>
+          <input id="ms-amount" type="number" min="1" className="input" value={amount} onChange={e => setAmount(e.target.value)} required />
+        </div>
+        <div className="input-group" style={{ flex: 1 }}>
+          <label className="input-label" htmlFor="ms-due">Due date</label>
+          <input id="ms-due" type="date" className="input" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <button className="btn btn--primary btn--sm" type="submit" disabled={loading}>{loading ? 'Adding…' : 'Add Milestone'}</button>
+        <button className="btn btn--ghost btn--sm" type="button" onClick={onCancel}>Cancel</button>
+      </div>
+    </form>
+  )
+}
+
+function ReviewForm({ title, onSubmit }) {
+  const [rating, setRating] = useState(5)
+  const [comment, setComment] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      await onSubmit({ rating, comment: comment.trim() })
+    } catch (err) {
+      setError(err.message || 'Failed to submit review')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="card" style={{ padding: 'var(--space-lg)', marginBottom: 'var(--space-md)' }}>
+      <h3 style={{ marginBottom: '0.5rem' }}>{title}</h3>
+      {error && <div className="alert alert--error" style={{ marginBottom: '0.75rem' }}>⚠️ {error}</div>}
+      <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.75rem', fontSize: '1.5rem', cursor: 'pointer' }}>
+        {[1, 2, 3, 4, 5].map(n => (
+          <span key={n} onClick={() => setRating(n)} role="button" aria-label={`${n} stars`}>
+            {n <= rating ? '★' : '☆'}
+          </span>
+        ))}
+      </div>
+      <div className="input-group" style={{ marginBottom: '0.75rem' }}>
+        <textarea className="input textarea" rows={2} placeholder="Optional comment" value={comment} onChange={e => setComment(e.target.value)} />
+      </div>
+      <button className="btn btn--primary btn--sm" type="submit" disabled={loading}>{loading ? 'Submitting…' : 'Submit Review'}</button>
+    </form>
+  )
+}
+
 export default function ProjectDetailPage() {
   const { id } = useParams()
   const router = useRouter()
@@ -43,6 +145,11 @@ export default function ProjectDetailPage() {
   const [updating, setUpdating] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [isTeamMember, setIsTeamMember] = useState(false)
+  const [milestones, setMilestones] = useState([])
+  const [showMilestoneForm, setShowMilestoneForm] = useState(false)
+  const [milestoneBusyId, setMilestoneBusyId] = useState(null)
+  const [reviews, setReviews] = useState([])
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => setUserId(user?.id || null))
@@ -55,7 +162,67 @@ export default function ProjectDetailPage() {
       })
       .catch(() => setError('Failed to load project'))
       .finally(() => setLoading(false))
+
+    fetch(`/api/projects/${id}/accept`)
+      .then(r => r.json())
+      .then(json => setIsTeamMember(!!json.isMember))
+      .catch(() => {})
+
+    fetch(`/api/projects/${id}/milestones`)
+      .then(r => r.json())
+      .then(json => setMilestones(json.data || []))
+      .catch(() => {})
+
+    fetch(`/api/projects/${id}/reviews`)
+      .then(r => r.json())
+      .then(json => setReviews(json.data || []))
+      .catch(() => {})
   }, [id])
+
+  const handleMilestoneStatus = async (milestoneId, status) => {
+    setMilestoneBusyId(milestoneId)
+    setError('')
+    try {
+      const res = await fetch(`/api/milestones/${milestoneId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      setMilestones(prev => prev.map(m => m.id === milestoneId ? json.data : m))
+    } catch (err) {
+      setError(err.message || 'Failed to update milestone')
+    } finally {
+      setMilestoneBusyId(null)
+    }
+  }
+
+  const handleDeleteMilestone = async (milestoneId) => {
+    if (!confirm('Delete this milestone?')) return
+    setMilestoneBusyId(milestoneId)
+    try {
+      const res = await fetch(`/api/milestones/${milestoneId}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      setMilestones(prev => prev.filter(m => m.id !== milestoneId))
+    } catch (err) {
+      setError(err.message || 'Failed to delete milestone')
+    } finally {
+      setMilestoneBusyId(null)
+    }
+  }
+
+  const submitReview = async (direction, { rating, comment }) => {
+    const res = await fetch(`/api/projects/${id}/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ direction, rating, comment }),
+    })
+    const json = await res.json()
+    if (!res.ok) throw new Error(json.error)
+    setReviews(prev => [json.data, ...prev])
+  }
 
   const handleStatusChange = async (status) => {
     setUpdating(true)
@@ -211,6 +378,111 @@ export default function ProjectDetailPage() {
             )}
           </aside>
         </div>
+
+        {(isOwner || isTeamMember) && (
+          <div className="card animate-fade-in-up" style={{ padding: 'var(--space-lg)', marginTop: 'var(--space-xl)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-md)' }}>
+              <h2 className="project-detail__section-title" style={{ margin: 0 }}>Milestones</h2>
+              {isOwner && !showMilestoneForm && (
+                <button className="btn btn--secondary btn--sm" onClick={() => setShowMilestoneForm(true)} id="add-milestone-btn">
+                  + Add Milestone
+                </button>
+              )}
+            </div>
+
+            {showMilestoneForm && (
+              <MilestoneForm
+                projectId={id}
+                onCancel={() => setShowMilestoneForm(false)}
+                onAdd={(m) => { setMilestones(prev => [...prev, m]); setShowMilestoneForm(false) }}
+              />
+            )}
+
+            {milestones.length === 0 ? (
+              <p style={{ color: 'var(--cl-text-secondary)' }}>
+                {isOwner ? 'No milestones yet — add one to break the project into payable chunks.' : 'The client hasn’t added any milestones yet.'}
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                {milestones.map(m => (
+                  <div key={m.id} className="card" style={{ padding: 'var(--space-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{m.title}</div>
+                      {m.description && <div style={{ fontSize: '0.8125rem', color: 'var(--cl-text-secondary)' }}>{m.description}</div>}
+                      <div style={{ fontSize: '0.8125rem', color: 'var(--cl-text-secondary)', marginTop: 2 }}>
+                        ₹{Number(m.amount).toLocaleString()}{m.due_date ? ` · due ${formatDate(m.due_date)}` : ''}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                      <span className="badge" style={{ background: `${MILESTONE_STATUS_COLORS[m.status]}18`, color: MILESTONE_STATUS_COLORS[m.status] }}>
+                        {MILESTONE_STATUS_LABELS[m.status] || m.status}
+                      </span>
+                      {isTeamMember && m.status === 'pending' && (
+                        <button className="btn btn--primary btn--sm" disabled={milestoneBusyId === m.id} onClick={() => handleMilestoneStatus(m.id, 'submitted')}>
+                          Submit
+                        </button>
+                      )}
+                      {isOwner && m.status === 'submitted' && (
+                        <>
+                          <button className="btn btn--primary btn--sm" disabled={milestoneBusyId === m.id} onClick={() => handleMilestoneStatus(m.id, 'approved')}>
+                            Approve
+                          </button>
+                          <button className="btn btn--ghost btn--sm" disabled={milestoneBusyId === m.id} onClick={() => handleMilestoneStatus(m.id, 'pending')}>
+                            Send back
+                          </button>
+                        </>
+                      )}
+                      {['submitted', 'approved'].includes(m.status) && (
+                        <button className="btn btn--ghost btn--sm" disabled={milestoneBusyId === m.id} onClick={() => handleMilestoneStatus(m.id, 'disputed')}>
+                          Dispute
+                        </button>
+                      )}
+                      {isOwner && m.status === 'pending' && (
+                        <button className="btn btn--ghost btn--sm" disabled={milestoneBusyId === m.id} onClick={() => handleDeleteMilestone(m.id)}>
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p style={{ fontSize: '0.75rem', color: 'var(--cl-text-tertiary)', marginTop: 'var(--space-md)' }}>
+              Payment release isn&apos;t wired up yet — approving a milestone records approval but doesn&apos;t move money.
+            </p>
+          </div>
+        )}
+
+        {project.status === 'completed' && (isOwner || isTeamMember) && (
+          <div className="card animate-fade-in-up" style={{ padding: 'var(--space-lg)', marginTop: 'var(--space-xl)' }}>
+            <h2 className="project-detail__section-title" style={{ marginBottom: 'var(--space-md)' }}>Reviews</h2>
+
+            {isOwner && project.collective_id && !reviews.some(r => r.direction === 'client_to_team') && (
+              <ReviewForm title="Rate the team" onSubmit={(r) => submitReview('client_to_team', r)} />
+            )}
+            {isTeamMember && !reviews.some(r => r.direction === 'team_to_client') && (
+              <ReviewForm title="Rate the client" onSubmit={(r) => submitReview('team_to_client', r)} />
+            )}
+
+            {reviews.length === 0 ? (
+              <p style={{ color: 'var(--cl-text-secondary)' }}>No reviews yet.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                {reviews.map(r => (
+                  <div key={r.id} className="card" style={{ padding: 'var(--space-md)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 600, fontSize: '0.8125rem' }}>
+                        {r.direction === 'client_to_team' ? 'Client → Team' : 'Team → Client'}
+                      </span>
+                      <Stars value={r.rating} />
+                    </div>
+                    {r.comment && <p style={{ marginTop: 4, fontSize: '0.875rem', color: 'var(--cl-text-secondary)' }}>{r.comment}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

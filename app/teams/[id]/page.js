@@ -26,9 +26,21 @@ export default function TeamDetailPage() {
   const [joining, setJoining] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
   const [recs, setRecs] = useState({ projects: [], freelancers: [] })
+  const [rating, setRating] = useState({ avg: null, count: 0 })
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => setUserId(user?.id || null))
+
+    createClient()
+      .from('reviews')
+      .select('rating')
+      .eq('collective_id', id)
+      .eq('direction', 'client_to_team')
+      .then(({ data }) => {
+        if (!data?.length) return
+        const avg = data.reduce((sum, r) => sum + r.rating, 0) / data.length
+        setRating({ avg, count: data.length })
+      })
 
     Promise.all([
       fetch(`/api/collectives/${id}`).then(r => r.json()),
@@ -142,6 +154,9 @@ export default function TeamDetailPage() {
                 <span className="badge badge--neutral">{FOCUS_LABELS[collective.focus_area] || collective.focus_area}</span>
               )}
               <span className="badge badge--neutral">👥 {members.length} member{members.length !== 1 ? 's' : ''}</span>
+              {rating.count > 0 && (
+                <span className="badge badge--neutral">⭐ {rating.avg.toFixed(1)} ({rating.count} review{rating.count !== 1 ? 's' : ''})</span>
+              )}
               {!collective.is_public && <span className="badge badge--warning">Private</span>}
             </div>
           </div>
