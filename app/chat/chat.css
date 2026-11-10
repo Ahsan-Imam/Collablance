@@ -24,6 +24,63 @@
   color: var(--cl-text);
 }
 
+.chat-sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-xl);
+  border: none;
+  border-bottom: 1px solid var(--cl-border);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.chat-sidebar__item:hover {
+  background: var(--cl-bg-tertiary);
+}
+
+.chat-sidebar__item--active {
+  background: var(--cl-bg-tertiary);
+}
+
+.chat-sidebar__item-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-sidebar__item-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--cl-text);
+}
+
+.chat-sidebar__item-hint {
+  font-size: 0.75rem;
+  color: var(--cl-text-tertiary);
+}
+
+.ai-tool-pill {
+  font-size: 0.8125rem;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  background: var(--cl-bg-secondary);
+  color: var(--cl-text-secondary);
+  margin: var(--space-xs) 0;
+  display: inline-block;
+}
+
+.ai-tool-pill--done {
+  background: color-mix(in srgb, var(--cl-primary-500) 12%, transparent);
+  color: var(--cl-primary-600);
+}
+
+.ai-tool-pill--error {
+  background: color-mix(in srgb, #dc2626 12%, transparent);
+  color: #dc2626;
+}
+
 .chat-sidebar__empty {
   flex: 1;
   display: flex;
