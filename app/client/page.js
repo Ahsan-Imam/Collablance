@@ -53,7 +53,7 @@ export default function ClientPage() {
             <h1 className="client-page__title">Hire with this account too</h1>
             <p className="client-page__subtitle">
               Your account is set up for freelancing. Add client access to post projects and hire
-              collectives — same email, same login. Switch modes from the top bar anytime.
+              teams — same email, same login. Switch modes from the top bar anytime.
             </p>
             <AddRoleButton role="client">Add client access</AddRoleButton>
             <Link href="/dashboard" className="btn btn--ghost">Back to Dashboard</Link>
@@ -80,11 +80,11 @@ export default function ClientPage() {
             <h1 className="client-page__title">
               Welcome, <span className="client-page__name">{userName}</span>
             </h1>
-            <p className="client-page__subtitle">Post projects and track how your collectives are doing.</p>
+            <p className="client-page__subtitle">Post projects and track how your teams are doing.</p>
           </div>
           <div className="client-page__actions">
-            <Link href="/collectives" className="btn btn--secondary btn--lg" id="client-find-collectives">
-              Find Collectives
+            <Link href="/teams" className="btn btn--secondary btn--lg" id="client-find-teams">
+              Find Teams
             </Link>
             <Link href="/projects/create" className="btn btn--primary btn--lg" id="client-post-project">
               + Post Project
@@ -133,7 +133,7 @@ export default function ClientPage() {
           <div className="projects-empty animate-fade-in-up">
             <div className="projects-empty__icon">📋</div>
             <h2 className="projects-empty__title">No projects yet</h2>
-            <p className="projects-empty__desc">Post your first project and collectives will be able to find it.</p>
+            <p className="projects-empty__desc">Post your first project and teams will be able to find it.</p>
             <Link href="/projects/create" className="btn btn--primary btn--lg" id="client-empty-post">
               Post Your First Project
             </Link>

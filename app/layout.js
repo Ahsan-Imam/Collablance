@@ -11,21 +11,21 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "CollabLance — Freelancer Collectives, Better Together",
+  title: "CollabLance — Freelancer Teams, Better Together",
   description:
-    "Form freelancer collectives, pitch clients together, and split payments automatically. India's platform for collaborative freelancing.",
+    "Form freelancer teams, pitch clients together, and split payments automatically. India's platform for collaborative freelancing.",
   keywords: [
     "freelancer",
-    "collective",
+    "team",
     "collaboration",
     "India",
     "freelancing platform",
     "team freelancing",
   ],
   openGraph: {
-    title: "CollabLance — Freelancer Collectives, Better Together",
+    title: "CollabLance — Freelancer Teams, Better Together",
     description:
-      "Form freelancer collectives, pitch clients together, and split payments automatically.",
+      "Form freelancer teams, pitch clients together, and split payments automatically.",
     type: "website",
     locale: "en_IN",
   },

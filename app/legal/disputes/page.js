@@ -11,7 +11,7 @@ export default function DisputesPage() {
         <h1 className="legal-title">Dispute Resolution Policy</h1>
         <p className="legal-subtitle">
           A fair, structured process for resolving disagreements 
-          between collectives and clients.
+          between teams and clients.
         </p>
       </div>
 

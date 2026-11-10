@@ -4,7 +4,7 @@ import '../page.css'
 export const metadata = {
   title: 'For Freelancers — CollabLance',
   description:
-    'Form freelancer collectives, pitch clients together, and split payments automatically.',
+    'Form freelancer teams, pitch clients together, and split payments automatically.',
 }
 
 export default function ForFreelancersPage() {
@@ -24,13 +24,13 @@ export default function ForFreelancersPage() {
             <span className="hero__title-gradient"> together</span>
           </h1>
           <p className="hero__subtitle animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-            Form named collectives. Pitch clients as a team. 
+            Form named teams. Pitch clients as a team. 
             Split payments automatically with transparent escrow. 
             No more solo hustle.
           </p>
           <div className="hero__cta animate-fade-in-up" style={{ animationDelay: '200ms' }}>
             <Link href="/auth/signup" className="btn btn--primary btn--xl" id="hero-cta">
-              Start Your Collective
+              Start Your Team
               <span className="hero__cta-arrow">→</span>
             </Link>
             <Link href="/for-freelancers#how-it-works" className="btn btn--secondary btn--xl" id="hero-learn">
@@ -38,7 +38,7 @@ export default function ForFreelancersPage() {
             </Link>
           </div>
           <p className="hero__client-link animate-fade-in-up" style={{ animationDelay: '250ms' }}>
-            Hiring instead? <Link href="/" id="hero-for-clients">Post a project for collectives →</Link>
+            Hiring instead? <Link href="/" id="hero-for-clients">Post a project for teams →</Link>
           </p>
           <div className="hero__stats animate-fade-in-up" style={{ animationDelay: '300ms' }}>
             <div className="hero__stat">
@@ -66,13 +66,13 @@ export default function ForFreelancersPage() {
             <span className="badge badge--accent">Features</span>
             <h2 className="section-title">Everything your team needs</h2>
             <p className="section-subtitle">
-              From forming your collective to getting paid — all in one place.
+              From forming your team to getting paid — all in one place.
             </p>
           </div>
           <div className="features__grid stagger-children">
-            <div className="card card--hover feature-card" id="feature-collectives">
+            <div className="card card--hover feature-card" id="feature-teams">
               <div className="feature-card__icon">👥</div>
-              <h3 className="feature-card__title">Named Collectives</h3>
+              <h3 className="feature-card__title">Named Teams</h3>
               <p className="feature-card__desc">
                 Create a branded team identity. Invite freelancers by skill. 
                 Pitch clients as a credible, organized unit.
@@ -107,7 +107,7 @@ export default function ForFreelancersPage() {
               <h3 className="feature-card__title">Reputation System</h3>
               <p className="feature-card__desc">
                 Build credibility through project ratings. 
-                Your collective&apos;s track record speaks louder than resumes.
+                Your team&apos;s track record speaks louder than resumes.
               </p>
             </div>
             <div className="card card--hover feature-card" id="feature-chat">
@@ -147,9 +147,9 @@ export default function ForFreelancersPage() {
             <div className="step" id="step-2">
               <div className="step__number">02</div>
               <div className="step__content">
-                <h3 className="step__title">Form a Collective</h3>
+                <h3 className="step__title">Form a Team</h3>
                 <p className="step__desc">
-                  Create a named collective or join one. Mix designers, 
+                  Create a named team or join one. Mix designers, 
                   developers, writers — whatever the project needs.
                 </p>
               </div>

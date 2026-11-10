@@ -154,7 +154,7 @@ export default function ProfilePage() {
               </div>
             )}
             <p className="profile-page__subtitle">
-              {isClient ? 'This is how collectives see you and your company.' : 'This is how clients and collectives see you.'}
+              {isClient ? 'This is how teams see you and your company.' : 'This is how clients and teams see you.'}
             </p>
           </div>
         </div>

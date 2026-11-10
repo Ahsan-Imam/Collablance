@@ -33,7 +33,7 @@ export default function PrivacyPage() {
           <h2>2. How We Use Your Data</h2>
           <ul>
             <li><strong>Platform operation:</strong> Account management, authentication, authorization</li>
-            <li><strong>Matching:</strong> Helping collectives find relevant projects and vice versa</li>
+            <li><strong>Matching:</strong> Helping teams find relevant projects and vice versa</li>
             <li><strong>Payments:</strong> Processing milestone payments and split distributions via Razorpay</li>
             <li><strong>Reputation:</strong> Calculating and displaying ratings and reputation scores</li>
             <li><strong>Communication:</strong> Facilitating team chat within projects</li>

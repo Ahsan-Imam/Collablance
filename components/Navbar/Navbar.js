@@ -123,11 +123,11 @@ export default function Navbar() {
                 </Link>
               )}
               <Link
-                href="/collectives"
-                className={`navbar__link ${isActive('/collectives') ? 'navbar__link--active' : ''}`}
-                id="nav-collectives"
+                href="/teams"
+                className={`navbar__link ${isActive('/teams') ? 'navbar__link--active' : ''}`}
+                id="nav-teams"
               >
-                {role === 'client' ? 'Find Collectives' : 'Collectives'}
+                {role === 'client' ? 'Find Teams' : 'Teams'}
               </Link>
               <Link
                 href="/projects"
