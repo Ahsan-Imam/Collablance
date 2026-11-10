@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { generateEmbedding, generateQueryEmbedding, buildEmbeddingText } from '@/lib/embeddings'
 import { sanitizeForOrFilter, escapeLike } from '@/lib/search'
+import { getContextEligibility } from '@/lib/contextEligibility'
 import {
   convertToModelMessages,
   createUIMessageStreamResponse,
@@ -62,14 +63,39 @@ export async function POST(request) {
 
     postTeamContext: tool({
       description:
-        "Post a new card to the CollabLance Team Context board on the user's behalf — e.g. to record what they're building, a decision just made, a blocker, or a goal from this conversation. Only call this when the user clearly wants to share something with the team, not for every message.",
+        "Post a new card to the CollabLance Team Context board on the user's behalf — e.g. to record what they're building, a decision just made, a blocker, or a goal from this conversation. Only call this when the user clearly wants to share something with the team, not for every message. Requires the user to already belong to a team (collective) that has a started project — if the tool returns an error saying they aren't eligible, tell them to create/join a team and start a project first instead of retrying.",
       inputSchema: z.object({
         section: z.enum(['building', 'perspective', 'blockers', 'decisions', 'goals', 'context']),
         title: z.string().describe('Short title for the card'),
         content: z.string().describe('The content to share'),
         tags: z.array(z.string()).optional(),
+        teamName: z.string().optional().describe('Name of the team/collective to post under, if the user belongs to more than one'),
+        projectTitle: z.string().optional().describe('Title of the project to scope this to, if the team has more than one started project'),
       }),
-      execute: async ({ section, title, content, tags }) => {
+      execute: async ({ section, title, content, tags, teamName, projectTitle }) => {
+        const elig = await getContextEligibility(supabase, user.id)
+        if (elig.error) return { error: elig.error }
+        if (!elig.eligible) {
+          return {
+            error: 'Not eligible to share context yet: the user needs to create or join a team and that team needs at least one started project. Suggest /collectives/create and /projects/create.',
+          }
+        }
+
+        let collective = elig.collectives[0]
+        if (teamName) {
+          collective = elig.collectives.find((c) => c.name.toLowerCase().includes(teamName.toLowerCase())) || collective
+        }
+
+        const candidateProjects = elig.projects.filter((p) => p.collective_id === collective.id)
+        if (!candidateProjects.length) {
+          return { error: `Team "${collective.name}" has no started project yet — start a project for that team before sharing context.` }
+        }
+
+        let project = candidateProjects[0]
+        if (projectTitle) {
+          project = candidateProjects.find((p) => p.title.toLowerCase().includes(projectTitle.toLowerCase())) || project
+        }
+
         const avatarInitial = displayName[0]?.toUpperCase() || 'M'
         const embeddingText = buildEmbeddingText({ section, title, content, tags, display_name: displayName })
         const embedding = await generateEmbedding(embeddingText)
@@ -84,6 +110,8 @@ export async function POST(request) {
             title,
             content,
             tags: tags || [],
+            collective_id: collective.id,
+            project_id: project.id,
             embedding: embedding ?? null,
             embedding_text: embedding ? embeddingText : null,
           })
@@ -91,7 +119,7 @@ export async function POST(request) {
           .single()
 
         if (error) return { error: error.message }
-        return { posted: true, card: data }
+        return { posted: true, card: data, team: collective.name, project: project.title }
       },
     }),
 
@@ -127,7 +155,7 @@ You have tools to:
 - postTeamContext: post a new card to that board on the user's behalf, when they clearly want to record or share something
 - listProjects: look up projects on the platform
 
-Use searchTeamContext when the user asks what the team is doing, has done, or is blocked on. Use postTeamContext only when the user is clearly sharing something worth recording (a decision, a blocker, a goal, progress) — confirm briefly what you posted. Keep replies concise and practical.`,
+Use searchTeamContext when the user asks what the team is doing, has done, or is blocked on. Use postTeamContext only when the user is clearly sharing something worth recording (a decision, a blocker, a goal, progress) — confirm briefly what you posted. Context sharing only works once the user belongs to a team with a started project; if postTeamContext errors for that reason, tell them to create/join a team and start a project first. Keep replies concise and practical.`,
     messages: convertToModelMessages(messages),
     tools,
     stopWhen: isStepCount(5),

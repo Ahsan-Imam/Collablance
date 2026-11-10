@@ -143,13 +143,6 @@ export default function Navbar() {
               >
                 Chat
               </Link>
-              <Link
-                href="/context"
-                className={`navbar__link navbar__link--context ${isActive('/context') ? 'navbar__link--active' : ''}`}
-                id="nav-context"
-              >
-                🧠 Context
-              </Link>
               <div className="navbar__actions">
                 {role && (
                   <button

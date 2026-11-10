@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { generateEmbedding, buildEmbeddingText } from '@/lib/embeddings'
+import { verifyContextScope } from '@/lib/contextEligibility'
 import { NextResponse } from 'next/server'
 
 // GET /api/context — fetch all context cards (optionally filtered)
@@ -11,6 +12,7 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const section = searchParams.get('section')
   const collectiveId = searchParams.get('collective_id')
+  const projectId = searchParams.get('project_id')
 
   let query = supabase
     .from('team_context')
@@ -20,6 +22,7 @@ export async function GET(request) {
 
   if (section) query = query.eq('section', section)
   if (collectiveId) query = query.eq('collective_id', collectiveId)
+  if (projectId) query = query.eq('project_id', projectId)
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -38,6 +41,11 @@ export async function POST(request) {
   if (!section || !title || !content) {
     return NextResponse.json({ error: 'section, title and content are required' }, { status: 400 })
   }
+
+  // Context sharing is team-scoped: requires membership in a collective that
+  // has a started project (see lib/contextEligibility.js).
+  const scope = await verifyContextScope(supabase, user.id, collective_id, project_id)
+  if (!scope.ok) return NextResponse.json({ error: scope.error }, { status: 403 })
 
   const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Member'
   const avatarInitial = displayName[0]?.toUpperCase() || 'M'
