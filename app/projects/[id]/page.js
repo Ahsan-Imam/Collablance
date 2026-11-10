@@ -162,6 +162,13 @@ export default function ProjectDetailPage() {
                 ? <Link href={`/collectives/${project.collectives.id}`}>👥 {project.collectives.name}</Link>
                 : 'Independent'}
             </Fact>
+            {project.collective_id && (
+              <Fact label="Workspace">
+                <Link href={`/projects/${project.id}/workspace`}>
+                  {project.accepted_at ? '🧠 Open workspace' : '🔒 Workspace (not accepted yet)'}
+                </Link>
+              </Fact>
+            )}
             <Fact label="Posted by">
               <span className="project-detail__owner">
                 <span className="avatar avatar--sm">{ownerName[0].toUpperCase()}</span>

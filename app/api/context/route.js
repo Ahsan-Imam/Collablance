@@ -12,6 +12,7 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const section = searchParams.get('section')
   const collectiveId = searchParams.get('collective_id')
+  const projectId = searchParams.get('project_id')
 
   let query = supabase
     .from('team_context')
@@ -21,6 +22,7 @@ export async function GET(request) {
 
   if (section) query = query.eq('section', section)
   if (collectiveId) query = query.eq('collective_id', collectiveId)
+  if (projectId) query = query.eq('project_id', projectId)
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
