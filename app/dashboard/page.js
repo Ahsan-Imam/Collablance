@@ -106,7 +106,7 @@ export default function DashboardPage() {
           <div className="stat-card" id="stat-rating">
             <div className="stat-card__icon">⭐</div>
             <div className="stat-card__data">
-              <span className="stat-card__number">{stats.avg_rating || '—'}</span>
+              <span className="stat-card__number">{stats.avg_rating ? stats.avg_rating.toFixed(1) : '—'}</span>
               <span className="stat-card__label">Avg Rating</span>
             </div>
           </div>
