@@ -100,7 +100,7 @@ export default function CreateProjectPage() {
         <div className="create-project__header animate-fade-in-up">
           <h1 className="create-project__title">Post a Project</h1>
           <p className="create-project__subtitle">
-            Describe the work, set a budget, and let collectives find you.
+            Describe the work, set a budget, and let teams find you.
           </p>
         </div>
 
@@ -158,7 +158,7 @@ export default function CreateProjectPage() {
 
           {collectives.length > 0 && (
             <div className="input-group">
-              <label htmlFor="collective_id" className="input-label">Post for a Collective (optional)</label>
+              <label htmlFor="collective_id" className="input-label">Post for a Team (optional)</label>
               <select id="collective_id" name="collective_id" className="input"
                 value={formData.collective_id} onChange={handleChange}>
                 <option value="">None — post as myself</option>

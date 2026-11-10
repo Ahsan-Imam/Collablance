@@ -2,7 +2,7 @@ import Link from 'next/link'
 import './page.css'
 
 export const metadata = {
-  title: 'Hire a Freelancer Collective — CollabLance',
+  title: 'Hire a Freelancer Team — CollabLance',
   description:
     'Post a project and hire a ready-made team of freelancers — designers, developers and writers who already work together.',
 }
@@ -24,7 +24,7 @@ export default function HomePage() {
             <span className="hero__title-gradient"> not just a freelancer</span>
           </h1>
           <p className="hero__subtitle animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-            Post your project once. Collectives of designers, developers and writers
+            Post your project once. Teams of designers, developers and writers
             who already work together pick it up — one team, one point of contact.
           </p>
           <div className="hero__cta animate-fade-in-up" style={{ animationDelay: '200ms' }}>
@@ -37,7 +37,7 @@ export default function HomePage() {
             </Link>
           </div>
           <p className="hero__client-link animate-fade-in-up" style={{ animationDelay: '250ms' }}>
-            Freelancer? <Link href="/for-freelancers" id="hero-for-freelancers">Start or join a collective →</Link>
+            Freelancer? <Link href="/for-freelancers" id="hero-for-freelancers">Start or join a team →</Link>
           </p>
           <div className="hero__stats animate-fade-in-up" style={{ animationDelay: '300ms' }}>
             <div className="hero__stat">
@@ -58,14 +58,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Why collectives */}
+      {/* Why teams */}
       <section className="features" id="features">
         <div className="container">
           <div className="section-header">
-            <span className="badge badge--accent">Why Collectives</span>
+            <span className="badge badge--accent">Why Teams</span>
             <h2 className="section-title">Skip assembling a team yourself</h2>
             <p className="section-subtitle">
-              A collective brings every skill your project needs, already coordinated.
+              A team brings every skill your project needs, already coordinated.
             </p>
           </div>
           <div className="features__grid stagger-children">
@@ -105,7 +105,7 @@ export default function HomePage() {
               <div className="feature-card__icon">⭐</div>
               <h3 className="feature-card__title">Proven Track Records</h3>
               <p className="feature-card__desc">
-                Collectives build reputation through rated projects,
+                Teams build reputation through rated projects,
                 so you know who you&apos;re hiring.
               </p>
             </div>
@@ -137,7 +137,7 @@ export default function HomePage() {
               <div className="step__content">
                 <h3 className="step__title">Sign Up as a Client</h3>
                 <p className="step__desc">
-                  Create a free client account and tell collectives
+                  Create a free client account and tell teams
                   a little about your company.
                 </p>
               </div>
@@ -157,9 +157,9 @@ export default function HomePage() {
             <div className="step" id="clients-step-3">
               <div className="step__number">03</div>
               <div className="step__content">
-                <h3 className="step__title">Pick a Collective</h3>
+                <h3 className="step__title">Pick a Team</h3>
                 <p className="step__desc">
-                  Browse collectives, compare their members and focus,
+                  Browse teams, compare their members and focus,
                   and choose the team that fits.
                 </p>
               </div>

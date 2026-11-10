@@ -162,7 +162,7 @@ export default function ChatPage() {
             <h2 className="chat-main__empty-title">Select a project chat</h2>
             <p className="chat-main__empty-desc">
               Your team conversations will appear here. Join a project to start chatting
-              with your collective members.
+              with your team members.
             </p>
           </div>
         )}

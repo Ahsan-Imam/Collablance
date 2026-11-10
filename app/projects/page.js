@@ -35,7 +35,7 @@ export default function ProjectsPage() {
           <div>
             <h1 className="projects-page__title">Projects</h1>
             <p className="projects-page__subtitle">
-              {isClient ? 'Browse projects or post a new one for collectives to pick up.' : 'Browse projects open to your collective.'}
+              {isClient ? 'Browse projects or post a new one for teams to pick up.' : 'Browse projects open to your team.'}
             </p>
           </div>
           {isClient && (

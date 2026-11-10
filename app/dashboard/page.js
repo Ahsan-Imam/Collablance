@@ -70,7 +70,7 @@ export default function DashboardPage() {
               Welcome back, <span className="dashboard__name">{userName}</span>
             </h1>
             <p className="dashboard__subtitle">
-              Here&apos;s what&apos;s happening with your collectives and projects.
+              Here&apos;s what&apos;s happening with your teams and projects.
             </p>
           </div>
           <Link href="/profile" className="btn btn--secondary" id="dash-edit-profile">
@@ -82,11 +82,11 @@ export default function DashboardPage() {
 
         {/* Quick Stats */}
         <div className="dashboard__stats stagger-children">
-          <div className="stat-card" id="stat-collectives">
+          <div className="stat-card" id="stat-teams">
             <div className="stat-card__icon">👥</div>
             <div className="stat-card__data">
               <span className="stat-card__number">{stats.collective_count}</span>
-              <span className="stat-card__label">Collectives</span>
+              <span className="stat-card__label">Teams</span>
             </div>
           </div>
           <div className="stat-card" id="stat-projects">
@@ -124,10 +124,10 @@ export default function DashboardPage() {
               </div>
               <span className="action-card__arrow">→</span>
             </Link>
-            <Link href="/collectives/create" className="action-card" id="action-create-collective">
+            <Link href="/teams/create" className="action-card" id="action-create-team">
               <div className="action-card__icon">🚀</div>
               <div className="action-card__content">
-                <h3 className="action-card__title">Create a Collective</h3>
+                <h3 className="action-card__title">Create a Team</h3>
                 <p className="action-card__desc">Form your first team and start pitching</p>
               </div>
               <span className="action-card__arrow">→</span>
@@ -150,12 +150,12 @@ export default function DashboardPage() {
             <div className="dashboard__empty">
               <span className="dashboard__empty-icon">📭</span>
               <p className="dashboard__empty-text">No activity yet</p>
-              <p className="dashboard__empty-hint">Start by completing your profile and joining a collective.</p>
+              <p className="dashboard__empty-hint">Start by completing your profile and joining a team.</p>
             </div>
           ) : (
             <div className="dashboard__activity">
               {recentCollectives.map(m => (
-                <Link key={m.collective_id} href={`/collectives/${m.collective_id}`} className="activity-item">
+                <Link key={m.collective_id} href={`/teams/${m.collective_id}`} className="activity-item">
                   <span className="activity-item__icon">👥</span>
                   <span className="activity-item__text">
                     <strong>{m.collectives?.name}</strong> — {m.role}

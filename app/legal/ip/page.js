@@ -29,7 +29,7 @@ export default function IPPage() {
           <h2>2. Work Ownership — Before Full Payment</h2>
           <p>
             Before full payment is released from escrow, all work remains the 
-            property of the collective that created it. Clients do not have 
+            property of the team that created it. Clients do not have 
             rights to use, distribute, or modify work until payment is complete.
           </p>
         </div>
@@ -39,7 +39,7 @@ export default function IPPage() {
           <div className="legal-highlight">
             CollabLance claims no ownership over any work created on the platform. 
             We are a facilitator, not a rights holder. All IP rights transfer 
-            directly between the collective and the client.
+            directly between the team and the client.
           </div>
         </div>
 

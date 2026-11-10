@@ -154,8 +154,8 @@ function SignupForm() {
 
         <div className="auth-role" role="radiogroup" aria-label="Account type">
           {[
-            { value: 'freelancer', icon: '🧑‍💻', title: 'Freelancer', desc: 'Join collectives and work on projects' },
-            { value: 'client', icon: '💼', title: 'Client', desc: 'Post projects and hire collectives' },
+            { value: 'freelancer', icon: '🧑‍💻', title: 'Freelancer', desc: 'Join teams and work on projects' },
+            { value: 'client', icon: '💼', title: 'Client', desc: 'Post projects and hire teams' },
           ].map(opt => (
             <button
               key={opt.value}

@@ -157,9 +157,9 @@ export default function ProjectDetailPage() {
           <aside className="card project-detail__facts">
             <Fact label="Budget">💰 {formatBudget(project)}</Fact>
             <Fact label="Deadline">{project.deadline ? `📅 ${formatDate(project.deadline)}` : 'No deadline'}</Fact>
-            <Fact label="Collective">
+            <Fact label="Team">
               {project.collectives
-                ? <Link href={`/collectives/${project.collectives.id}`}>👥 {project.collectives.name}</Link>
+                ? <Link href={`/teams/${project.collectives.id}`}>👥 {project.collectives.name}</Link>
                 : 'Independent'}
             </Fact>
             {project.collective_id && (

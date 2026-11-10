@@ -19,7 +19,7 @@ export default function TermsPage() {
         <div className="legal-section">
           <h2>1. Platform Description & Permitted Use</h2>
           <p>
-            CollabLance is a platform where freelancers form named collectives, 
+            CollabLance is a platform where freelancers form named teams, 
             pitch clients together, and split payments automatically. The platform 
             facilitates project management, milestone tracking, escrow payments, 
             and team collaboration.
@@ -41,13 +41,13 @@ export default function TermsPage() {
         </div>
 
         <div className="legal-section">
-          <h2>3. Collective Formation Rules</h2>
+          <h2>3. Team Formation Rules</h2>
           <ul>
-            <li>Any freelancer can create a collective and invite other freelancers to join</li>
-            <li>Collective names must be unique on the platform and must not infringe on existing trademarks</li>
-            <li>A freelancer may belong to multiple collectives simultaneously</li>
-            <li>Collective creators are responsible for managing membership and resolving internal disputes</li>
-            <li>CollabLance reserves the right to disband collectives that violate platform rules</li>
+            <li>Any freelancer can create a team and invite other freelancers to join</li>
+            <li>Team names must be unique on the platform and must not infringe on existing trademarks</li>
+            <li>A freelancer may belong to multiple teams simultaneously</li>
+            <li>Team creators are responsible for managing membership and resolving internal disputes</li>
+            <li>CollabLance reserves the right to disband teams that violate platform rules</li>
           </ul>
         </div>
 
@@ -69,7 +69,7 @@ export default function TermsPage() {
           </div>
           <ul>
             <li><strong>Escrow:</strong> Client funds are held in escrow via Razorpay until milestone approval</li>
-            <li><strong>Release:</strong> Funds are released to the collective upon client approval of each milestone</li>
+            <li><strong>Release:</strong> Funds are released to the team upon client approval of each milestone</li>
             <li><strong>Splits:</strong> Payment splits are defined at project setup and locked once agreed by all parties</li>
             <li><strong>Platform fee:</strong> 3-5% of each milestone payment, deducted before distribution</li>
             <li><strong>Processing:</strong> Payments are processed via Razorpay within 5-7 business days of milestone approval</li>
@@ -96,7 +96,7 @@ export default function TermsPage() {
           <h2>7. Intellectual Property</h2>
           <p>
             Work produced on CollabLance belongs to the client upon full payment release 
-            from escrow. Before full payment, work remains the property of the collective 
+            from escrow. Before full payment, work remains the property of the team 
             that created it. See our full <a href="/legal/ip">Intellectual Property Policy</a> for details.
           </p>
         </div>
