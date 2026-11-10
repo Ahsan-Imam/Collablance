@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { generateEmbedding, buildEmbeddingText } from '@/lib/embeddings'
+import { verifyContextScope } from '@/lib/contextEligibility'
 import { NextResponse } from 'next/server'
 
 // GET /api/context — fetch all context cards (optionally filtered)
@@ -38,6 +39,11 @@ export async function POST(request) {
   if (!section || !title || !content) {
     return NextResponse.json({ error: 'section, title and content are required' }, { status: 400 })
   }
+
+  // Context sharing is team-scoped: requires membership in a collective that
+  // has a started project (see lib/contextEligibility.js).
+  const scope = await verifyContextScope(supabase, user.id, collective_id, project_id)
+  if (!scope.ok) return NextResponse.json({ error: scope.error }, { status: 403 })
 
   const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Member'
   const avatarInitial = displayName[0]?.toUpperCase() || 'M'

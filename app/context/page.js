@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import './context.css'
 
@@ -88,19 +89,53 @@ function ContextCard({ card, currentUserId, onDelete, onPin }) {
   )
 }
 
+// ── Locked CTA — shown instead of the composer until team + project exist ──
+function ContextLockedNotice() {
+  return (
+    <div className="ctx-form ctx-locked animate-scale-in" id="context-locked-notice">
+      <div className="ctx-form__header">
+        <h3 className="ctx-form__title">🔒 Context sharing is team-scoped</h3>
+      </div>
+      <p style={{ color: 'var(--cl-text-secondary)', marginBottom: '1rem' }}>
+        You need to be part of a team with a project under way before you can share context —
+        it keeps the board meaningful instead of a free-for-all feed.
+      </p>
+      <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <Link href="/collectives/create" className="btn btn--primary">👥 Create a team</Link>
+        <Link href="/projects/create" className="btn btn--secondary">🚀 Start a project</Link>
+      </div>
+    </div>
+  )
+}
+
 // ── Add Card Form ────────────────────────────────────────────────────────────
-function AddCardForm({ onAdd, onCancel }) {
+function AddCardForm({ onAdd, onCancel, eligibility }) {
+  const { collectives = [], projects = [] } = eligibility
   const [section, setSection] = useState('building')
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [tags, setTags] = useState('')
+  const [collectiveId, setCollectiveId] = useState(collectives[0]?.id || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const teamProjects = projects.filter(p => p.collective_id === collectiveId)
+  const [projectId, setProjectId] = useState(teamProjects[0]?.id || '')
+
+  const handleTeamChange = (id) => {
+    setCollectiveId(id)
+    const firstProject = projects.find(p => p.collective_id === id)
+    setProjectId(firstProject?.id || '')
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!title.trim() || !content.trim()) {
       setError('Title and content are required.')
+      return
+    }
+    if (!collectiveId || !projectId) {
+      setError('Pick a team and a project to scope this card to.')
       return
     }
     setLoading(true)
@@ -114,6 +149,8 @@ function AddCardForm({ onAdd, onCancel }) {
           title: title.trim(),
           content: content.trim(),
           tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+          collective_id: collectiveId,
+          project_id: projectId,
         }),
       })
       const json = await res.json()
@@ -136,6 +173,37 @@ function AddCardForm({ onAdd, onCancel }) {
       {error && <div className="alert alert--error" style={{ marginBottom: '1rem' }}>⚠️ {error}</div>}
 
       <form onSubmit={handleSubmit}>
+        <div className="input-group" style={{ marginBottom: '1rem', display: 'flex', gap: '0.75rem' }}>
+          <div style={{ flex: 1 }}>
+            <label htmlFor="ctx-team" className="input-label">Team</label>
+            <select
+              id="ctx-team"
+              className="input"
+              value={collectiveId}
+              onChange={e => handleTeamChange(e.target.value)}
+              required
+            >
+              {collectives.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+          <div style={{ flex: 1 }}>
+            <label htmlFor="ctx-project" className="input-label">Project</label>
+            <select
+              id="ctx-project"
+              className="input"
+              value={projectId}
+              onChange={e => setProjectId(e.target.value)}
+              required
+            >
+              {teamProjects.map(p => (
+                <option key={p.id} value={p.id}>{p.title}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         <div className="input-group" style={{ marginBottom: '1rem' }}>
           <label className="input-label">Section</label>
           <div className="ctx-form__section-grid">
@@ -224,12 +292,21 @@ export default function ContextPage() {
   const [showForm, setShowForm] = useState(false)
   const [currentUserId, setCurrentUserId] = useState(null)
   const [error, setError] = useState('')
+  const [eligibility, setEligibility] = useState({ eligible: false, collectives: [], projects: [], loading: true })
 
   // Load current user
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => {
       setCurrentUserId(user?.id || null)
     })
+  }, [])
+
+  // Context sharing is team-scoped — check once whether this user qualifies
+  useEffect(() => {
+    fetch('/api/context/eligibility')
+      .then(r => r.json())
+      .then(json => setEligibility({ ...json, loading: false }))
+      .catch(() => setEligibility({ eligible: false, collectives: [], projects: [], loading: false }))
   }, [])
 
   // Fetch cards — returns the result instead of setting state, so effects can
@@ -355,9 +432,11 @@ export default function ContextPage() {
             <button
               className="btn btn--primary btn--xl"
               onClick={() => setShowForm(!showForm)}
+              disabled={!eligibility.loading && !eligibility.eligible}
+              title={!eligibility.loading && !eligibility.eligible ? 'Join a team with a started project to unlock sharing' : undefined}
               id="add-context-btn"
             >
-              {showForm ? '✕ Cancel' : '+ Share Context'}
+              {showForm ? '✕ Cancel' : eligibility.loading ? '…' : eligibility.eligible ? '+ Share Context' : '🔒 Share Context'}
             </button>
           </div>
 
@@ -383,7 +462,9 @@ export default function ContextPage() {
       <div className="container ctx-page__body">
         {/* Add Form */}
         {showForm && (
-          <AddCardForm onAdd={handleAdd} onCancel={() => setShowForm(false)} />
+          eligibility.eligible
+            ? <AddCardForm onAdd={handleAdd} onCancel={() => setShowForm(false)} eligibility={eligibility} />
+            : <ContextLockedNotice />
         )}
 
         {/* Filters + Search */}
@@ -446,7 +527,7 @@ export default function ContextPage() {
             </p>
             {cards.length === 0 && (
               <button className="btn btn--primary btn--lg" onClick={() => setShowForm(true)} id="empty-add-ctx">
-                Share Your First Context
+                {eligibility.eligible ? 'Share Your First Context' : '🔒 Join a team to share context'}
               </button>
             )}
           </div>
