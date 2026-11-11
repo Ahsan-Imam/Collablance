@@ -13,7 +13,7 @@ const inter = Inter({
 export const metadata = {
   title: "CollabLance — Freelancer Teams, Better Together",
   description:
-    "Form freelancer teams, pitch clients together, and split payments automatically. India's platform for collaborative freelancing.",
+    "Form freelancer teams, pitch clients together, and agree payment splits before work starts. India's platform for collaborative freelancing.",
   keywords: [
     "freelancer",
     "team",
@@ -25,7 +25,7 @@ export const metadata = {
   openGraph: {
     title: "CollabLance — Freelancer Teams, Better Together",
     description:
-      "Form freelancer teams, pitch clients together, and split payments automatically.",
+      "Form freelancer teams, pitch clients together, and agree payment splits before work starts.",
     type: "website",
     locale: "en_IN",
   },
