@@ -1,7 +1,9 @@
--- Attack tests for security_hardening_migration.sql. NEVER run on the real database.
--- Local throwaway DB: run tests/supabase_stub.sql, app_schema.sql, project_acceptance, milestones, reviews,
--- team_invites, project_applications, team_leader, contracts, the stub's grants/users, then
--- security_hardening_migration.sql, then this file with psql. Each step echoes what to expect.
+-- Attack tests for the access rules (RLS + triggers). NEVER run on the real database.
+-- Needs a throwaway local Postgres 17 + pgvector (brew install postgresql@17 pgvector):
+--   1. run supabase_stub.sql (fake auth schema/roles)
+--   2. run every supabase/migrations/*.sql in filename order
+--   3. run the grants + test users from the bottom of supabase_stub.sql
+--   4. psql -f this file — each step echoes what to expect
 \set C '''11111111-1111-1111-1111-111111111111'''
 \set L '''22222222-2222-2222-2222-222222222222'''
 \set M '''33333333-3333-3333-3333-333333333333'''
@@ -82,3 +84,19 @@ select set_config('request.jwt.claim.sub', :L, false) \g /dev/null
 update project_applications set status = 'accepted' where id = 'eeeeeeee-0000-0000-0000-000000000001';
 \echo '== 7b. lead withdraws (expect UPDATE 1)'
 update project_applications set status = 'withdrawn' where id = 'eeeeeeee-0000-0000-0000-000000000001';
+
+-- Client role: posting needs client access, granted only through add_role()
+reset role;
+set role authenticated;
+select set_config('request.jwt.claim.sub', '44444444-4444-4444-4444-444444444444', false) \g /dev/null
+\echo '== R1. freelancer posts project (expect ERROR - needs client access)'
+insert into projects(owner_id, title, description) values ('44444444-4444-4444-4444-444444444444', 'x', 'y');
+\echo '== R2. freelancer makes self client by editing profile directly (expect is_client=f, trigger reverts it)'
+update profiles set is_client = true, role = 'client' where id = '44444444-4444-4444-4444-444444444444';
+select is_client, role from profiles where id = '44444444-4444-4444-4444-444444444444';
+\echo '== R3. "Become a client" via add_role (expect client)'
+select add_role('client');
+\echo '== R4. now posts project (expect status=open)'
+insert into projects(owner_id, title, description, status) values ('44444444-4444-4444-4444-444444444444', 'x', 'y', 'completed') returning status;
+\echo '== R5. switch back to freelancer mode (expect freelancer)'
+select switch_role('freelancer');
