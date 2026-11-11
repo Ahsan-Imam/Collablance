@@ -27,6 +27,8 @@ export default function TeamDetailPage() {
   const [linkCopied, setLinkCopied] = useState(false)
   const [recs, setRecs] = useState({ projects: [], freelancers: [] })
   const [rating, setRating] = useState({ avg: null, count: 0 })
+  const [invitedIds, setInvitedIds] = useState(new Set())
+  const [invitingId, setInvitingId] = useState(null)
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => setUserId(user?.id || null))
@@ -75,6 +77,25 @@ export default function TeamDetailPage() {
       setError(err.message || 'Failed to join team')
     } finally {
       setJoining(false)
+    }
+  }
+
+  const handleInvite = async (freelancerId) => {
+    setInvitingId(freelancerId)
+    setError('')
+    try {
+      const res = await fetch(`/api/collectives/${id}/invites`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: freelancerId }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      setInvitedIds(prev => new Set(prev).add(freelancerId))
+    } catch (err) {
+      setError(err.message || 'Failed to send invite')
+    } finally {
+      setInvitingId(null)
     }
   }
 
@@ -266,7 +287,7 @@ export default function TeamDetailPage() {
           <div className="collective-detail__section animate-fade-in-up" style={{ animationDelay: '300ms' }}>
             <h2 className="collective-detail__section-title">Recommended Freelancers to Invite</h2>
             <p style={{ color: 'var(--cl-text-secondary)', fontSize: '0.875rem', marginBottom: 'var(--space-md)' }}>
-              Available freelancers whose skills fit this team. There&apos;s no in-app invite yet — copy the link and send it to them directly.
+              Available freelancers whose skills fit this team — invite them and they&apos;ll see it in their Inbox.
             </p>
             <div className="member-list">
               {recs.freelancers.map(f => (
@@ -278,9 +299,19 @@ export default function TeamDetailPage() {
                       {f.skills?.slice(0, 3).join(', ') || f.location || 'Available'}
                     </span>
                   </div>
-                  <button className="btn btn--ghost btn--sm" onClick={handleCopyLink}>
-                    {linkCopied ? '✅' : '🔗 Invite'}
-                  </button>
+                  {isOwner ? (
+                    <button
+                      className="btn btn--ghost btn--sm"
+                      onClick={() => handleInvite(f.id)}
+                      disabled={invitingId === f.id || invitedIds.has(f.id)}
+                    >
+                      {invitedIds.has(f.id) ? '✅ Invited' : invitingId === f.id ? 'Inviting…' : '📬 Invite'}
+                    </button>
+                  ) : (
+                    <button className="btn btn--ghost btn--sm" onClick={handleCopyLink}>
+                      {linkCopied ? '✅' : '🔗 Share Link'}
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

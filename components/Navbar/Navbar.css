@@ -187,3 +187,19 @@
 .navbar__role-toggle {
   white-space: nowrap;
 }
+
+.navbar__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 4px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: white;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+}

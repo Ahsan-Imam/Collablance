@@ -16,6 +16,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [lastPathname, setLastPathname] = useState(null)
+  const [pendingInvites, setPendingInvites] = useState(0)
   const pathname = usePathname()
   const router = useRouter()
 
@@ -59,6 +60,16 @@ export default function Navbar() {
     window.addEventListener(ROLE_CHANGED_EVENT, load)
     return () => window.removeEventListener(ROLE_CHANGED_EVENT, load)
   }, [userId])
+
+  // Pending invite count for the inbox badge — refetch when navigating,
+  // so responding to an invite clears it.
+  useEffect(() => {
+    if (!userId) return
+    fetch('/api/invites')
+      .then(r => r.json())
+      .then(json => setPendingInvites((json.data || []).filter(i => i.status === 'pending').length))
+      .catch(() => {})
+  }, [userId, pathname])
 
   // The other mode: switch to it if the account has it, otherwise add it
   const otherRole = role === 'client' ? 'freelancer' : 'client'
@@ -142,6 +153,17 @@ export default function Navbar() {
                 id="nav-chat"
               >
                 Chat
+              </Link>
+              <Link
+                href="/inbox"
+                className={`navbar__link ${isActive('/inbox') ? 'navbar__link--active' : ''}`}
+                id="nav-inbox"
+                style={{ position: 'relative' }}
+              >
+                📬 Inbox
+                {pendingInvites > 0 && (
+                  <span className="navbar__badge" id="nav-inbox-badge">{pendingInvites}</span>
+                )}
               </Link>
               <div className="navbar__actions">
                 {role && (
