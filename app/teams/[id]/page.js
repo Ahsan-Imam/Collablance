@@ -13,6 +13,8 @@ const FOCUS_LABELS = {
   devops: 'DevOps', fullstack: 'Full-Stack', other: 'Other',
 }
 
+const ROLE_LABELS = { owner: 'Owner', admin: 'Team Leader', member: 'Member' }
+
 export default function TeamDetailPage() {
   const { id } = useParams()
   const router = useRouter()
@@ -29,6 +31,8 @@ export default function TeamDetailPage() {
   const [rating, setRating] = useState({ avg: null, count: 0 })
   const [invitedIds, setInvitedIds] = useState(new Set())
   const [invitingId, setInvitingId] = useState(null)
+  const [appliedProjectIds, setAppliedProjectIds] = useState(new Set())
+  const [applyingProjectId, setApplyingProjectId] = useState(null)
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => setUserId(user?.id || null))
@@ -99,6 +103,49 @@ export default function TeamDetailPage() {
     }
   }
 
+  const [roleBusyId, setRoleBusyId] = useState(null)
+
+  const handleSetRole = async (memberUserId, role) => {
+    setRoleBusyId(memberUserId)
+    setError('')
+    try {
+      const res = await fetch(`/api/collectives/${id}/members/${memberUserId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      setCollective(prev => ({
+        ...prev,
+        collective_members: prev.collective_members.map(m => m.user_id === memberUserId ? { ...m, role } : m),
+      }))
+    } catch (err) {
+      setError(err.message || 'Failed to update role')
+    } finally {
+      setRoleBusyId(null)
+    }
+  }
+
+  const handleApply = async (projectId) => {
+    setApplyingProjectId(projectId)
+    setError('')
+    try {
+      const res = await fetch(`/api/projects/${projectId}/applications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ collective_id: id }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      setAppliedProjectIds(prev => new Set(prev).add(projectId))
+    } catch (err) {
+      setError(err.message || 'Failed to apply')
+    } finally {
+      setApplyingProjectId(null)
+    }
+  }
+
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href)
@@ -153,6 +200,7 @@ export default function TeamDetailPage() {
   const isOwner = userId && userId === collective.owner_id
   const members = collective.collective_members || []
   const isMember = isOwner || members.some(m => m.user_id === userId)
+  const isLeader = isOwner || members.some(m => m.user_id === userId && m.role === 'admin')
 
   return (
     <div className="collective-detail">
@@ -228,15 +276,25 @@ export default function TeamDetailPage() {
             <div className="member-list">
               {members.map(m => {
                 const name = m.profiles?.full_name || 'Member'
+                const isSelf = m.user_id === collective.owner_id
                 return (
                   <div key={m.user_id} className="card member-item">
                     <div className="avatar avatar--sm">{name[0].toUpperCase()}</div>
-                    <div className="member-item__info">
+                    <div className="member-item__info" style={{ flex: 1 }}>
                       <span className="member-item__name">{name}</span>
                       <span className="member-item__sub">
-                        {m.role}{m.profiles?.location ? ` · ${m.profiles.location}` : ''}
+                        {ROLE_LABELS[m.role] || m.role}{m.profiles?.location ? ` · ${m.profiles.location}` : ''}
                       </span>
                     </div>
+                    {isOwner && !isSelf && (
+                      <button
+                        className="btn btn--ghost btn--sm"
+                        disabled={roleBusyId === m.user_id}
+                        onClick={() => handleSetRole(m.user_id, m.role === 'admin' ? 'member' : 'admin')}
+                      >
+                        {roleBusyId === m.user_id ? '…' : m.role === 'admin' ? 'Remove Leader' : 'Make Team Leader'}
+                      </button>
+                    )}
                   </div>
                 )
               })}
@@ -266,18 +324,27 @@ export default function TeamDetailPage() {
           <div className="collective-detail__section animate-fade-in-up" style={{ animationDelay: '250ms' }}>
             <h2 className="collective-detail__section-title">Recommended Projects</h2>
             <p style={{ color: 'var(--cl-text-secondary)', fontSize: '0.875rem', marginBottom: 'var(--space-md)' }}>
-              Open projects that fit {collective.name}&apos;s focus — post for one from the project page.
+              Open projects that fit {collective.name}&apos;s focus.
             </p>
             <div className="member-list">
               {recs.projects.map(p => (
-                <Link key={p.id} href={`/projects/${p.id}`} className="card member-item">
-                  <div className="member-item__info">
+                <div key={p.id} className="card member-item">
+                  <Link href={`/projects/${p.id}`} className="member-item__info" style={{ flex: 1 }}>
                     <span className="member-item__name">{p.title}</span>
                     <span className="member-item__sub">
                       {p.skills_needed?.slice(0, 3).join(', ') || 'Open project'}
                     </span>
-                  </div>
-                </Link>
+                  </Link>
+                  {isLeader && (
+                    <button
+                      className="btn btn--ghost btn--sm"
+                      onClick={() => handleApply(p.id)}
+                      disabled={applyingProjectId === p.id || appliedProjectIds.has(p.id)}
+                    >
+                      {appliedProjectIds.has(p.id) ? '✅ Applied' : applyingProjectId === p.id ? 'Applying…' : '📨 Apply'}
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
           </div>
@@ -299,7 +366,7 @@ export default function TeamDetailPage() {
                       {f.skills?.slice(0, 3).join(', ') || f.location || 'Available'}
                     </span>
                   </div>
-                  {isOwner ? (
+                  {isLeader ? (
                     <button
                       className="btn btn--ghost btn--sm"
                       onClick={() => handleInvite(f.id)}

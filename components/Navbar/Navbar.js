@@ -94,6 +94,7 @@ export default function Navbar() {
   }, [])
 
   const handleLogout = async () => {
+    if (!confirm('Log out of CollabLance?')) return
     const supabase = createClient()
     await supabase.auth.signOut()
     setUser(null)
