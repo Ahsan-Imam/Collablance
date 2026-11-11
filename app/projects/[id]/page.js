@@ -97,6 +97,46 @@ function MilestoneForm({ projectId, onAdd, onCancel }) {
   )
 }
 
+function ApplyForm({ myTeams, onSubmit }) {
+  const [collectiveId, setCollectiveId] = useState(myTeams[0]?.id || '')
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      await onSubmit({ collective_id: collectiveId, message })
+    } catch (err) {
+      setError(err.message || 'Failed to apply')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="card animate-fade-in-up" style={{ padding: 'var(--space-lg)', marginTop: 'var(--space-xl)' }}>
+      <h2 className="project-detail__section-title" style={{ marginBottom: 'var(--space-sm)' }}>Apply as a Team</h2>
+      {error && <div className="alert alert--error" style={{ marginBottom: '0.75rem' }}>⚠️ {error}</div>}
+      <div className="input-group" style={{ marginBottom: '0.75rem' }}>
+        <label className="input-label" htmlFor="apply-team">Team</label>
+        <select id="apply-team" className="input" value={collectiveId} onChange={e => setCollectiveId(e.target.value)} required>
+          {myTeams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+        </select>
+      </div>
+      <div className="input-group" style={{ marginBottom: '0.75rem' }}>
+        <label className="input-label" htmlFor="apply-message">Message (optional)</label>
+        <textarea id="apply-message" className="input textarea" rows={3} placeholder="Why your team is a good fit…" value={message} onChange={e => setMessage(e.target.value)} />
+      </div>
+      <button className="btn btn--primary" type="submit" disabled={loading || !collectiveId}>
+        {loading ? 'Applying…' : '📨 Apply'}
+      </button>
+    </form>
+  )
+}
+
 function ReviewForm({ title, onSubmit }) {
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState('')
@@ -150,6 +190,10 @@ export default function ProjectDetailPage() {
   const [showMilestoneForm, setShowMilestoneForm] = useState(false)
   const [milestoneBusyId, setMilestoneBusyId] = useState(null)
   const [reviews, setReviews] = useState([])
+  const [myOwnedTeams, setMyOwnedTeams] = useState([])
+  const [applications, setApplications] = useState([])
+  const [appliedTeamIds, setAppliedTeamIds] = useState(new Set())
+  const [applicationBusyId, setApplicationBusyId] = useState(null)
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => setUserId(user?.id || null))
@@ -177,7 +221,60 @@ export default function ProjectDetailPage() {
       .then(r => r.json())
       .then(json => setReviews(json.data || []))
       .catch(() => {})
+
+    // Teams I own, in case this project is open for applications
+    fetch('/api/collectives?mine=true')
+      .then(r => r.json())
+      .then(json => {
+        createClient().auth.getUser().then(({ data: { user } }) => {
+          setMyOwnedTeams((json.data || []).filter(t => t.owner_id === user?.id))
+        })
+      })
+      .catch(() => {})
+
+    // If I own this project, see who's applied
+    fetch(`/api/projects/${id}/applications`)
+      .then(r => r.json())
+      .then(json => setApplications(json.data || []))
+      .catch(() => {})
   }, [id])
+
+  const handleApply = async ({ collective_id: collectiveId, message }) => {
+    const res = await fetch(`/api/projects/${id}/applications`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ collective_id: collectiveId, message }),
+    })
+    const json = await res.json()
+    if (!res.ok) throw new Error(json.error)
+    setAppliedTeamIds(prev => new Set(prev).add(collectiveId))
+  }
+
+  const handleApplication = async (applicationId, action) => {
+    setApplicationBusyId(applicationId)
+    setError('')
+    try {
+      const res = await fetch(`/api/applications/${applicationId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      if (action === 'accept') {
+        setApplications(prev => prev.map(a => a.id === applicationId
+          ? { ...a, status: 'accepted' }
+          : a.status === 'pending' ? { ...a, status: 'rejected' } : a))
+        setProject(prev => ({ ...prev, status: 'in_progress', collective_id: applications.find(a => a.id === applicationId)?.collective_id }))
+      } else {
+        setApplications(prev => prev.map(a => a.id === applicationId ? { ...a, status: json.data.status } : a))
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to update application')
+    } finally {
+      setApplicationBusyId(null)
+    }
+  }
 
   const handleMilestoneStatus = async (milestoneId, status) => {
     setMilestoneBusyId(milestoneId)
@@ -378,6 +475,45 @@ export default function ProjectDetailPage() {
             )}
           </aside>
         </div>
+
+        {!isOwner && project.status === 'open' && !project.collective_id && myOwnedTeams.length > 0 && (
+          <ApplyForm myTeams={myOwnedTeams} onSubmit={handleApply} />
+        )}
+
+        {isOwner && project.status === 'open' && !project.collective_id && (
+          <div className="card animate-fade-in-up" style={{ padding: 'var(--space-lg)', marginTop: 'var(--space-xl)' }}>
+            <h2 className="project-detail__section-title" style={{ marginBottom: 'var(--space-md)' }}>Applications</h2>
+            {applications.length === 0 ? (
+              <p style={{ color: 'var(--cl-text-secondary)' }}>No applications yet.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                {applications.map(a => (
+                  <div key={a.id} className="card" style={{ padding: 'var(--space-md)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
+                    <div className="avatar avatar--sm">{a.collectives?.avatar_initial || '?'}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600 }}>
+                        <Link href={`/teams/${a.collectives?.id}`}>{a.collectives?.name}</Link>
+                      </div>
+                      {a.message && <div style={{ fontSize: '0.8125rem', color: 'var(--cl-text-secondary)' }}>{a.message}</div>}
+                    </div>
+                    {a.status === 'pending' ? (
+                      <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+                        <button className="btn btn--primary btn--sm" disabled={applicationBusyId === a.id} onClick={() => handleApplication(a.id, 'accept')}>
+                          Accept
+                        </button>
+                        <button className="btn btn--ghost btn--sm" disabled={applicationBusyId === a.id} onClick={() => handleApplication(a.id, 'reject')}>
+                          Reject
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="badge badge--neutral">{a.status}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {(isOwner || isTeamMember) && (
           <div className="card animate-fade-in-up" style={{ padding: 'var(--space-lg)', marginTop: 'var(--space-xl)' }}>
