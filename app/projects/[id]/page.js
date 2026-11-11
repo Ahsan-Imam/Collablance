@@ -137,6 +137,124 @@ function ApplyForm({ myTeams, onSubmit }) {
   )
 }
 
+function ContractSection({ projectId, collectiveId, teamMembers, userId, isLeader }) {
+  const [contract, setContract] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [splitInputs, setSplitInputs] = useState({})
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    fetch(`/api/projects/${projectId}/contracts?collective_id=${collectiveId}`)
+      .then(r => r.json())
+      .then(json => setContract(json.data || null))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [projectId, collectiveId])
+
+  const handleCreate = async (e) => {
+    e.preventDefault()
+    setError('')
+    setBusy(true)
+    try {
+      const splits = teamMembers.map(m => ({ user_id: m.user_id, percent: Number(splitInputs[m.user_id] || 0) }))
+      const res = await fetch(`/api/projects/${projectId}/contracts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ collective_id: collectiveId, splits }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      setContract(json.data)
+    } catch (err) {
+      setError(err.message || 'Failed to propose split')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const handleSign = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      const res = await fetch(`/api/contracts/${contract.id}/sign`, { method: 'POST' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      setContract(json.data)
+    } catch (err) {
+      setError(err.message || 'Failed to sign')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (loading) return null
+
+  const total = Object.values(splitInputs).reduce((sum, v) => sum + (Number(v) || 0), 0)
+  const mySigned = contract?.signatures?.some(s => s.user_id === userId)
+  const nameFor = (uid) => teamMembers.find(m => m.user_id === uid)?.profiles?.full_name || 'Member'
+
+  return (
+    <div className="card animate-fade-in-up" style={{ padding: 'var(--space-lg)', marginTop: 'var(--space-xl)' }}>
+      <h2 className="project-detail__section-title" style={{ marginBottom: 'var(--space-sm)' }}>💰 Payment Split Contract</h2>
+      {error && <div className="alert alert--error" style={{ marginBottom: '0.75rem' }}>⚠️ {error}</div>}
+
+      {!contract ? (
+        isLeader ? (
+          <form onSubmit={handleCreate}>
+            <p style={{ color: 'var(--cl-text-secondary)', fontSize: '0.875rem', marginBottom: 'var(--space-md)' }}>
+              Propose how the payout splits across the team — must add up to 100%. Every member has to sign before this project can be accepted.
+            </p>
+            {teamMembers.map(m => (
+              <div key={m.user_id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: '0.5rem' }}>
+                <span style={{ flex: 1 }}>{m.profiles?.full_name || 'Member'}</span>
+                <input
+                  type="number" min="1" max="100" className="input" style={{ width: 90 }}
+                  value={splitInputs[m.user_id] || ''}
+                  onChange={e => setSplitInputs(prev => ({ ...prev, [m.user_id]: e.target.value }))}
+                  required
+                />
+                <span>%</span>
+              </div>
+            ))}
+            <p style={{ fontSize: '0.8125rem', color: total === 100 ? 'var(--cl-primary-600)' : '#dc2626', marginBottom: 'var(--space-md)' }}>
+              Total: {total}%{total !== 100 ? ' — must equal 100%' : ' ✓'}
+            </p>
+            <button className="btn btn--primary btn--sm" type="submit" disabled={busy || total !== 100}>
+              {busy ? 'Proposing…' : 'Propose Split'}
+            </button>
+          </form>
+        ) : (
+          <p style={{ color: 'var(--cl-text-secondary)' }}>Your team leader hasn&apos;t proposed a payment split yet.</p>
+        )
+      ) : (
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: 'var(--space-md)' }}>
+            {contract.splits.map(s => {
+              const signed = contract.signatures.some(sig => sig.user_id === s.user_id)
+              return (
+                <div key={s.user_id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                  <span>{nameFor(s.user_id)} — {s.percent}%</span>
+                  <span>{signed ? '✅ Signed' : '⏳ Pending'}</span>
+                </div>
+              )
+            })}
+          </div>
+          {contract.status === 'signed' ? (
+            <span className="badge badge--primary">🔒 Fully signed &amp; locked</span>
+          ) : mySigned ? (
+            <p style={{ color: 'var(--cl-text-secondary)', fontSize: '0.875rem' }}>Waiting on the rest of the team to sign.</p>
+          ) : (
+            <button className="btn btn--primary btn--sm" onClick={handleSign} disabled={busy}>
+              {busy ? 'Signing…' : '✍️ Sign Contract'}
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
 function ReviewForm({ title, onSubmit }) {
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState('')
@@ -194,6 +312,7 @@ export default function ProjectDetailPage() {
   const [applications, setApplications] = useState([])
   const [appliedTeamIds, setAppliedTeamIds] = useState(new Set())
   const [applicationBusyId, setApplicationBusyId] = useState(null)
+  const [teamMembers, setTeamMembers] = useState([])
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => setUserId(user?.id || null))
@@ -227,17 +346,34 @@ export default function ProjectDetailPage() {
       .then(r => r.json())
       .then(json => {
         createClient().auth.getUser().then(({ data: { user } }) => {
-          setMyOwnedTeams((json.data || []).filter(t => t.owner_id === user?.id))
+          setMyOwnedTeams((json.data || []).filter(t => ['owner', 'admin'].includes(t.my_role)))
         })
       })
       .catch(() => {})
 
-    // If I own this project, see who's applied
+    // If I own this project, see who's applied; if I lead an applying team,
+    // see my own team's application
     fetch(`/api/projects/${id}/applications`)
       .then(r => r.json())
       .then(json => setApplications(json.data || []))
       .catch(() => {})
   }, [id])
+
+  // Which team's payment split contract is relevant here — either the team
+  // already assigned to the project, or (while applying) my own team's
+  // pending/accepted application
+  const contractCollectiveId = project?.collective_id && isTeamMember
+    ? project.collective_id
+    : applications.find(a => ['pending', 'accepted'].includes(a.status) && myOwnedTeams.some(t => t.id === a.collective_id))?.collective_id || null
+  const isContractTeamLeader = myOwnedTeams.some(t => t.id === contractCollectiveId)
+
+  useEffect(() => {
+    if (!contractCollectiveId) return
+    fetch(`/api/collectives/${contractCollectiveId}`)
+      .then(r => r.json())
+      .then(json => setTeamMembers(json.data?.collective_members || []))
+      .catch(() => {})
+  }, [contractCollectiveId])
 
   const handleApply = async ({ collective_id: collectiveId, message }) => {
     const res = await fetch(`/api/projects/${id}/applications`, {
@@ -513,6 +649,16 @@ export default function ProjectDetailPage() {
               </div>
             )}
           </div>
+        )}
+
+        {contractCollectiveId && teamMembers.length > 0 && (
+          <ContractSection
+            projectId={id}
+            collectiveId={contractCollectiveId}
+            teamMembers={teamMembers}
+            userId={userId}
+            isLeader={isContractTeamLeader}
+          />
         )}
 
         {(isOwner || isTeamMember) && (

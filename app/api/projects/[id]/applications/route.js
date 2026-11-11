@@ -4,22 +4,15 @@ import { NextResponse } from 'next/server'
 
 const COLUMNS = 'id,project_id,collective_id,applied_by,message,status,created_at,responded_at,collectives(id,name,avatar_initial,focus_area)'
 
-// GET /api/projects/[id]/applications — project owner reviews applications
+// GET /api/projects/[id]/applications — the project owner sees every
+// application; anyone else sees only the applications from a team they
+// belong to (enforced by RLS — this query doesn't filter by role itself).
 export async function GET(request, { params }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
-  const { data: project, error: projErr } = await supabase
-    .from('projects')
-    .select('id, owner_id')
-    .eq('id', id)
-    .maybeSingle()
-  if (projErr) return NextResponse.json({ error: projErr.message }, { status: 500 })
-  if (!project) return NextResponse.json({ error: 'Project not found' }, { status: 404 })
-  if (project.owner_id !== user.id) return NextResponse.json({ error: 'Only the project owner can view applications' }, { status: 403 })
-
   const { data, error } = await supabase
     .from('project_applications')
     .select(COLUMNS)

@@ -19,17 +19,19 @@ export async function GET(request) {
     `)
     .order('created_at', { ascending: false })
 
+  let myRoleByCollective = {}
   if (mine && user) {
     // Look up memberships first, then filter collectives by id — filtering on the
     // embedded collective_members would also limit the member count to 1.
     const { data: memberships, error: memErr } = await supabase
       .from('collective_members')
-      .select('collective_id')
+      .select('collective_id, role')
       .eq('user_id', user.id)
 
     if (memErr) return NextResponse.json({ error: memErr.message }, { status: 500 })
     if (!memberships.length) return NextResponse.json({ data: [] })
 
+    myRoleByCollective = Object.fromEntries(memberships.map(m => [m.collective_id, m.role]))
     query = query.in('id', memberships.map(m => m.collective_id))
   } else {
     // Browsing (e.g. clients looking for a team) only lists public collectives
@@ -42,7 +44,8 @@ export async function GET(request) {
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data })
+  const withRole = mine && user ? data.map(c => ({ ...c, my_role: myRoleByCollective[c.id] || null })) : data
+  return NextResponse.json({ data: withRole })
 }
 
 // POST /api/collectives — create a collective

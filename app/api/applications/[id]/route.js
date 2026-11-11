@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { canAcceptProject } from '@/lib/projectAcceptance'
+import { getSignedContract, CONTRACT_REQUIRED_ERROR } from '@/lib/contracts'
 import { NextResponse } from 'next/server'
 
 // PATCH /api/applications/[id] — accept/reject (project owner) or withdraw
@@ -50,6 +51,11 @@ export async function PATCH(request, { params }) {
   // accept — the project must still be open and unassigned
   if (application.projects.status !== 'open' || application.projects.collective_id) {
     return NextResponse.json({ error: 'This project is no longer open for applications' }, { status: 400 })
+  }
+
+  const signedContract = await getSignedContract(supabase, application.project_id, application.collective_id)
+  if (!signedContract) {
+    return NextResponse.json({ error: CONTRACT_REQUIRED_ERROR }, { status: 400 })
   }
 
   const { data: updatedApplication, error: acceptErr } = await supabase

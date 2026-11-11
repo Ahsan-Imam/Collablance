@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getProjectMembership, canAcceptProject } from '@/lib/projectAcceptance'
+import { getSignedContract, CONTRACT_REQUIRED_ERROR } from '@/lib/contracts'
 import { NextResponse } from 'next/server'
 
 // GET /api/projects/[id]/accept — workspace access/acceptance status
@@ -19,6 +20,7 @@ export async function GET(request, { params }) {
   if (!project) return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 
   const membership = await getProjectMembership(supabase, user.id, project.collective_id)
+  const signedContract = project.collective_id ? await getSignedContract(supabase, id, project.collective_id) : null
 
   return NextResponse.json({
     project,
@@ -26,6 +28,7 @@ export async function GET(request, { params }) {
     isMember: !!membership,
     canAccept: !!membership && ['owner', 'admin'].includes(membership.role),
     accepted: !!project.accepted_at,
+    contractSigned: !!signedContract,
   })
 }
 
@@ -54,6 +57,11 @@ export async function POST(request, { params }) {
   const allowed = await canAcceptProject(supabase, user.id, project.collective_id)
   if (!allowed) {
     return NextResponse.json({ error: 'Only a team owner or admin can accept this project' }, { status: 403 })
+  }
+
+  const signedContract = await getSignedContract(supabase, id, project.collective_id)
+  if (!signedContract) {
+    return NextResponse.json({ error: CONTRACT_REQUIRED_ERROR }, { status: 400 })
   }
 
   const { data, error } = await supabase
