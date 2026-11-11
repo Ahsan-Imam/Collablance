@@ -79,10 +79,15 @@ export default function ProjectWorkspacePage() {
               <button className="btn btn--primary btn--lg" onClick={handleAccept} disabled={accepting} id="accept-project-btn">
                 {accepting ? 'Accepting…' : `✅ Accept for ${project.collectives?.name || 'your team'}`}
               </button>
+              <p style={{ color: 'var(--cl-text-tertiary)', fontSize: '0.8125rem', marginTop: 'var(--space-md)' }}>
+                Every team member needs to sign the payment split contract first — propose and sign it from the{' '}
+                <Link href={`/projects/${id}`}>project page</Link>.
+              </p>
             </>
           ) : isOwner ? (
             <p style={{ color: 'var(--cl-text-secondary)' }}>
-              Waiting for {project.collectives?.name || 'the assigned team'} to accept this project.
+              Waiting for {project.collectives?.name || 'the assigned team'} to sign their payment split contract
+              and accept this project — see progress on the <Link href={`/projects/${id}`}>project page</Link>.
               The workspace opens as soon as they do.
             </p>
           ) : isMember ? (

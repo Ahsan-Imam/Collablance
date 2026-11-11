@@ -34,13 +34,13 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: signErr.message }, { status: 500 })
   }
 
-  const [{ data: members }, { data: signatures }] = await Promise.all([
-    supabase.from('collective_members').select('user_id').eq('collective_id', contract.collective_id),
-    supabase.from('contract_signatures').select('user_id').eq('contract_id', id),
-  ])
+  const { data: signatures } = await supabase.from('contract_signatures').select('user_id').eq('contract_id', id)
 
   let updatedContract = contract
-  const allSigned = members.every((m) => signatures.some((s) => s.user_id === m.user_id))
+  // Check against the split's own member list, not a fresh team-roster query —
+  // membership can change after the split is proposed, and a locked split is
+  // never edited, so completion must be judged by who's actually in it.
+  const allSigned = contract.splits.every((s) => signatures.some((sig) => sig.user_id === s.user_id))
   if (allSigned) {
     const { data } = await supabase
       .from('project_contracts')

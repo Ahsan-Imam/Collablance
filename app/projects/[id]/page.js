@@ -137,7 +137,7 @@ function ApplyForm({ myTeams, onSubmit }) {
   )
 }
 
-function ContractSection({ projectId, collectiveId, teamMembers, userId, isLeader }) {
+function ContractSection({ projectId, collectiveId, teamMembers, userId, isLeader, canSign }) {
   const [contract, setContract] = useState(null)
   const [loading, setLoading] = useState(true)
   const [splitInputs, setSplitInputs] = useState({})
@@ -190,7 +190,8 @@ function ContractSection({ projectId, collectiveId, teamMembers, userId, isLeade
 
   if (loading) return null
 
-  const total = Object.values(splitInputs).reduce((sum, v) => sum + (Number(v) || 0), 0)
+  const allFilled = teamMembers.every(m => Number(splitInputs[m.user_id]) > 0)
+  const total = teamMembers.reduce((sum, m) => sum + (Number(splitInputs[m.user_id]) || 0), 0)
   const mySigned = contract?.signatures?.some(s => s.user_id === userId)
   const nameFor = (uid) => teamMembers.find(m => m.user_id === uid)?.profiles?.full_name || 'Member'
 
@@ -217,10 +218,10 @@ function ContractSection({ projectId, collectiveId, teamMembers, userId, isLeade
                 <span>%</span>
               </div>
             ))}
-            <p style={{ fontSize: '0.8125rem', color: total === 100 ? 'var(--cl-primary-600)' : '#dc2626', marginBottom: 'var(--space-md)' }}>
-              Total: {total}%{total !== 100 ? ' — must equal 100%' : ' ✓'}
+            <p style={{ fontSize: '0.8125rem', color: allFilled && total === 100 ? 'var(--cl-primary-600)' : '#dc2626', marginBottom: 'var(--space-md)' }}>
+              Total: {total}%{!allFilled ? ' — every member needs a number' : total !== 100 ? ' — must equal 100%' : ' ✓'}
             </p>
-            <button className="btn btn--primary btn--sm" type="submit" disabled={busy || total !== 100}>
+            <button className="btn btn--primary btn--sm" type="submit" disabled={busy || !allFilled || total !== 100}>
               {busy ? 'Proposing…' : 'Propose Split'}
             </button>
           </form>
@@ -242,7 +243,7 @@ function ContractSection({ projectId, collectiveId, teamMembers, userId, isLeade
           </div>
           {contract.status === 'signed' ? (
             <span className="badge badge--primary">🔒 Fully signed &amp; locked</span>
-          ) : mySigned ? (
+          ) : mySigned || !canSign ? (
             <p style={{ color: 'var(--cl-text-secondary)', fontSize: '0.875rem' }}>Waiting on the rest of the team to sign.</p>
           ) : (
             <button className="btn btn--primary btn--sm" onClick={handleSign} disabled={busy}>
@@ -362,7 +363,7 @@ export default function ProjectDetailPage() {
   // Which team's payment split contract is relevant here — either the team
   // already assigned to the project, or (while applying) my own team's
   // pending/accepted application
-  const contractCollectiveId = project?.collective_id && isTeamMember
+  const contractCollectiveId = project?.collective_id && (isTeamMember || userId === project.owner_id)
     ? project.collective_id
     : applications.find(a => ['pending', 'accepted'].includes(a.status) && myOwnedTeams.some(t => t.id === a.collective_id))?.collective_id || null
   const isContractTeamLeader = myOwnedTeams.some(t => t.id === contractCollectiveId)
@@ -658,6 +659,7 @@ export default function ProjectDetailPage() {
             teamMembers={teamMembers}
             userId={userId}
             isLeader={isContractTeamLeader}
+            canSign={isTeamMember}
           />
         )}
 
