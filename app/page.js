@@ -52,7 +52,7 @@ export default function HomePage() {
             <div className="hero__stat-divider" />
             <div className="hero__stat">
               <span className="hero__stat-number">100%</span>
-              <span className="hero__stat-label">Escrow protected</span>
+              <span className="hero__stat-label">Team-signed payout splits</span>
             </div>
           </div>
         </div>
@@ -95,10 +95,10 @@ export default function HomePage() {
             </div>
             <div className="card card--hover feature-card" id="clients-feature-escrow">
               <div className="feature-card__icon">🔒</div>
-              <h3 className="feature-card__title">Pay per Milestone</h3>
+              <h3 className="feature-card__title">Approve per Milestone</h3>
               <p className="feature-card__desc">
-                Funds are held in escrow and released only when
-                you approve each milestone.
+                Work is split into milestones you review and approve
+                one by one. Secure milestone payments are coming soon.
               </p>
             </div>
             <div className="card card--hover feature-card" id="clients-feature-reputation">
@@ -168,10 +168,10 @@ export default function HomePage() {
             <div className="step" id="clients-step-4">
               <div className="step__number">04</div>
               <div className="step__content">
-                <h3 className="step__title">Approve &amp; Pay</h3>
+                <h3 className="step__title">Review &amp; Approve</h3>
                 <p className="step__desc">
-                  Review each milestone. Approve it, and payment is
-                  released to the team.
+                  Review each milestone and approve it, or send it
+                  back for changes. Online payments are coming soon.
                 </p>
               </div>
             </div>

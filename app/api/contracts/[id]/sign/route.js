@@ -34,22 +34,16 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: signErr.message }, { status: 500 })
   }
 
-  const { data: signatures } = await supabase.from('contract_signatures').select('user_id').eq('contract_id', id)
-
-  let updatedContract = contract
-  // Check against the split's own member list, not a fresh team-roster query —
-  // membership can change after the split is proposed, and a locked split is
-  // never edited, so completion must be judged by who's actually in it.
-  const allSigned = contract.splits.every((s) => signatures.some((sig) => sig.user_id === s.user_id))
-  if (allSigned) {
-    const { data } = await supabase
+  // The contract_signatures_lock DB trigger flips the contract to 'signed'
+  // once everyone in the split has signed — users can't update it directly.
+  const [{ data: signatures }, { data: updatedContract }] = await Promise.all([
+    supabase.from('contract_signatures').select('user_id').eq('contract_id', id),
+    supabase
       .from('project_contracts')
-      .update({ status: 'signed', locked_at: new Date().toISOString() })
-      .eq('id', id)
       .select('id, collective_id, status, project_id, created_by, splits, created_at, locked_at')
-      .single()
-    if (data) updatedContract = data
-  }
+      .eq('id', id)
+      .single(),
+  ])
 
-  return NextResponse.json({ data: { ...updatedContract, signatures } })
+  return NextResponse.json({ data: { ...(updatedContract || contract), signatures: signatures || [] } })
 }

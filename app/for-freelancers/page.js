@@ -4,7 +4,7 @@ import '../page.css'
 export const metadata = {
   title: 'For Freelancers — CollabLance',
   description:
-    'Form freelancer teams, pitch clients together, and split payments automatically.',
+    'Form freelancer teams, pitch clients together, and agree payment splits before work starts.',
 }
 
 export default function ForFreelancersPage() {
@@ -25,7 +25,7 @@ export default function ForFreelancersPage() {
           </h1>
           <p className="hero__subtitle animate-fade-in-up" style={{ animationDelay: '100ms' }}>
             Form named teams. Pitch clients as a team. 
-            Split payments automatically with transparent escrow. 
+            Agree the payment split before work starts.
             No more solo hustle.
           </p>
           <div className="hero__cta animate-fade-in-up" style={{ animationDelay: '200ms' }}>
@@ -42,8 +42,8 @@ export default function ForFreelancersPage() {
           </p>
           <div className="hero__stats animate-fade-in-up" style={{ animationDelay: '300ms' }}>
             <div className="hero__stat">
-              <span className="hero__stat-number">3-5%</span>
-              <span className="hero__stat-label">Platform fee only</span>
+              <span className="hero__stat-number">1</span>
+              <span className="hero__stat-label">Shared workspace per project</span>
             </div>
             <div className="hero__stat-divider" />
             <div className="hero__stat">
@@ -53,7 +53,7 @@ export default function ForFreelancersPage() {
             <div className="hero__stat-divider" />
             <div className="hero__stat">
               <span className="hero__stat-number">100%</span>
-              <span className="hero__stat-label">Escrow protected</span>
+              <span className="hero__stat-label">Team-signed payout splits</span>
             </div>
           </div>
         </div>
@@ -82,24 +82,24 @@ export default function ForFreelancersPage() {
               <div className="feature-card__icon">📋</div>
               <h3 className="feature-card__title">Milestone Tracking</h3>
               <p className="feature-card__desc">
-                Break projects into clear milestones. Track progress. 
-                Get paid per milestone — no waiting for the full project.
+                Break projects into clear milestones. Track progress.
+                The client reviews and approves each one as you go.
               </p>
             </div>
             <div className="card card--hover feature-card" id="feature-payments">
               <div className="feature-card__icon">💰</div>
-              <h3 className="feature-card__title">Auto Payment Splits</h3>
+              <h3 className="feature-card__title">Signed Payment Splits</h3>
               <p className="feature-card__desc">
-                Define splits upfront. When a client approves, 
-                Razorpay distributes funds automatically. No chasing.
+                Your team lead proposes the split, every member signs,
+                and it locks before work starts. No arguments later.
               </p>
             </div>
             <div className="card card--hover feature-card" id="feature-escrow">
               <div className="feature-card__icon">🔒</div>
-              <h3 className="feature-card__title">Escrow Protection</h3>
+              <h3 className="feature-card__title">Secure Payments (Coming Soon)</h3>
               <p className="feature-card__desc">
-                Client funds held in escrow until milestones are approved. 
-                Fair for everyone. Disputes handled on-platform.
+                Client funds held until each milestone is approved, then
+                paid out per your signed split. Launching soon.
               </p>
             </div>
             <div className="card card--hover feature-card" id="feature-reputation">
@@ -114,7 +114,7 @@ export default function ForFreelancersPage() {
               <div className="feature-card__icon">💬</div>
               <h3 className="feature-card__title">Team Chat</h3>
               <p className="feature-card__desc">
-                Built-in project chat. Keep discussions, files, and decisions 
+                Built-in project chat. Keep discussions and decisions
                 in one place. No switching between apps.
               </p>
             </div>
@@ -169,10 +169,10 @@ export default function ForFreelancersPage() {
             <div className="step" id="step-4">
               <div className="step__number">04</div>
               <div className="step__content">
-                <h3 className="step__title">Get Paid Fairly</h3>
+                <h3 className="step__title">Deliver &amp; Get Approved</h3>
                 <p className="step__desc">
-                  Client approves milestones. Funds released from escrow 
-                  and split automatically. Razorpay handles the rest.
+                  Submit each milestone for client approval. Online
+                  payouts per your signed split are coming soon.
                 </p>
               </div>
             </div>

@@ -68,12 +68,17 @@ export async function DELETE(request, { params }) {
 
   const { id } = await params
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('projects')
     .delete()
     .eq('id', id)
     .eq('owner_id', user.id)
+    .select('id')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  // RLS only allows deleting before a team accepts — after that, cancel instead
+  if (!data?.length) {
+    return NextResponse.json({ error: 'Only an unaccepted project you own can be deleted. Cancel an accepted project instead.' }, { status: 400 })
+  }
   return NextResponse.json({ success: true })
 }

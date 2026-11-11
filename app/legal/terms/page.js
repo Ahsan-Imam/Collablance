@@ -7,7 +7,7 @@ export default function TermsPage() {
   return (
     <>
       <div className="legal-header">
-        <p className="legal-updated">Last updated: October 2024</p>
+        <p className="legal-updated">Last updated: November 2026</p>
         <h1 className="legal-title">Terms of Service</h1>
         <p className="legal-subtitle">
           These terms govern your use of the CollabLance platform. 
@@ -20,9 +20,9 @@ export default function TermsPage() {
           <h2>1. Platform Description & Permitted Use</h2>
           <p>
             CollabLance is a platform where freelancers form named teams, 
-            pitch clients together, and split payments automatically. The platform 
-            facilitates project management, milestone tracking, escrow payments, 
-            and team collaboration.
+            pitch clients together, and agree payment splits before work starts. The platform
+            facilitates project management, milestone tracking and team collaboration.
+            Escrow payments are not live yet; see Section 5.
           </p>
           <p>
             You may use CollabLance only for lawful freelancing activities. Any use 
@@ -63,6 +63,11 @@ export default function TermsPage() {
 
         <div className="legal-section">
           <h2>5. Payment Terms</h2>
+          <p>
+            <strong>Online payments are not live yet.</strong> Until they launch, CollabLance
+            does not collect, hold or transfer any money, and charges no platform fee.
+            The terms below apply from the date payments launch, with notice as set out in Section 12.
+          </p>
           <div className="legal-highlight">
             CollabLance charges a platform fee of 3-5% on each milestone payment. 
             This fee is non-refundable once a milestone is approved by the client.

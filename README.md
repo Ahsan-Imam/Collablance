@@ -28,6 +28,8 @@ Run the SQL files in `lib/db/` against your Supabase project, in this order, via
 3. `dual_role_migration.sql`, `client_role_migration.sql`, `google_client_signup_migration.sql` — client/freelancer dual-role accounts
 4. `project_acceptance_migration.sql` — team accepts a project to open its workspace
 5. `milestones_migration.sql`, `reviews_migration.sql`, `project_messages_migration.sql` — milestones, ratings, team chat
+6. `team_invites_migration.sql`, `project_applications_migration.sql`, `team_leader_migration.sql`, `contracts_migration.sql` — invites, team applications, team leader role, payment split contracts
+7. `security_hardening_migration.sql` — **always last**: makes the database enforce who can change what (the browser can call Supabase directly, so API checks alone aren't enough)
 
 ### AI Assistant (`/chat`)
 
