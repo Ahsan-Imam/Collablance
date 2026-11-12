@@ -66,6 +66,9 @@ export async function POST(request) {
     return NextResponse.json({ data: { hasPayoutAccount: true } }, { status: 201 })
   } catch (err) {
     console.error('[payments] payout account setup failed for user', user.id, err.message)
+    if (/route feature not enabled/i.test(err.message)) {
+      return NextResponse.json({ error: 'Payouts aren’t switched on for CollabLance yet — your details are fine, please try again later.' }, { status: 503 })
+    }
     return NextResponse.json({ error: 'Razorpay couldn’t verify those details. Check them and try again.' }, { status: 502 })
   }
 }
