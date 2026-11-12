@@ -1,66 +1,26 @@
 import { createClient } from '@/lib/supabase/server'
-import { generateEmbedding, buildEmbeddingText } from '@/lib/embeddings'
+import { indexContextCards, CARD_COLUMNS } from '@/lib/ai/contextSearch'
+import { vectorsEnabled } from '@/lib/ai/vectors'
 import { NextResponse } from 'next/server'
 
 /**
- * POST /api/context/backfill
- * Re-generates embeddings for all cards that don't have one yet.
- * Admin/owner-only: only processes cards owned by the calling user.
- * Batch size: 10 cards per call to avoid timeouts.
- *
- * Returns: { processed, skipped, errors }
+ * POST /api/context/backfill — (re)index the caller's own cards for semantic
+ * search. Needed once after connecting Chroma, for cards written before it.
+ * Safe to call again: it replaces, never duplicates.
  */
-export async function POST(request) {
+export async function POST() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!vectorsEnabled()) return NextResponse.json({ error: 'Semantic search isn’t set up on this server yet.' }, { status: 503 })
 
-  // Fetch up to 10 cards without embeddings belonging to this user
-  const { data: cards, error: fetchErr } = await supabase
-    .from('team_context')
-    .select('*')
-    .eq('user_id', user.id)
-    .is('embedding', null)
-    .limit(10)
+  const { data: cards, error } = await supabase.from('team_context').select(CARD_COLUMNS).eq('user_id', user.id).limit(500)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 })
-  if (!cards || cards.length === 0) {
-    return NextResponse.json({ processed: 0, skipped: 0, errors: 0, message: 'All your cards already have embeddings ✅' })
+  let processed = 0
+  for (let i = 0; i < cards.length; i += 50) {
+    const batch = cards.slice(i, i + 50)
+    if (await indexContextCards(batch)) processed += batch.length
   }
-
-  let processed = 0, skipped = 0, errors = 0
-
-  for (const card of cards) {
-    try {
-      const embeddingText = buildEmbeddingText(card)
-      const embedding = await generateEmbedding(embeddingText)
-
-      if (!embedding) {
-        skipped++
-        continue
-      }
-
-      const { error: updateErr } = await supabase
-        .from('team_context')
-        .update({ embedding, embedding_text: embeddingText })
-        .eq('id', card.id)
-
-      if (updateErr) {
-        errors++
-        console.error('[backfill] update error:', updateErr.message)
-      } else {
-        processed++
-      }
-    } catch (err) {
-      errors++
-      console.error('[backfill] card error:', err.message)
-    }
-  }
-
-  return NextResponse.json({
-    processed,
-    skipped,
-    errors,
-    remaining: cards.length === 10 ? 'more cards remaining — call again' : 'done',
-  })
+  return NextResponse.json({ processed, errors: cards.length - processed })
 }

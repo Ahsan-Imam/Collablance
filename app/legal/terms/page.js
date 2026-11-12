@@ -118,11 +118,17 @@ export default function TermsPage() {
         </div>
 
         <div className="legal-section">
-          <h2>9. NDA Violations (Phase 2)</h2>
+          <h2>9. Non-Disclosure Agreements</h2>
           <p>
-            NDA generation and signing features are planned for a future release. 
-            When available, NDA violations will result in fines and permanent ban 
-            from the platform. Details will be updated here.
+            A client can ask the team on a project to sign a standard non-disclosure
+            agreement on CollabLance. The agreement is between the client and each
+            team member who signs it. CollabLance records who signed and when, but
+            is not a party to it and does not provide legal advice.
+          </p>
+          <p>
+            If we find that a user has broken an NDA signed on the platform, we may
+            suspend or permanently ban their account. Any claim for damages is
+            between the client and the team member concerned.
           </p>
         </div>
 

@@ -149,6 +149,13 @@ export default function Navbar() {
                 Projects
               </Link>
               <Link
+                href="/chat"
+                className={`navbar__link ${isActive('/chat') ? 'navbar__link--active' : ''}`}
+                id="nav-chat"
+              >
+                Assistant
+              </Link>
+              <Link
                 href="/inbox"
                 className={`navbar__link ${isActive('/inbox') ? 'navbar__link--active' : ''}`}
                 id="nav-inbox"

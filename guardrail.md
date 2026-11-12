@@ -5,12 +5,15 @@ You are building CollabLance — a platform where freelancers
 form named collectives, pitch clients together, and split 
 payments automatically. Built solo by a student founder. 
 Stack: Next.js, Supabase (PostgreSQL), Razorpay, 
-LangChain, Claude API, Chroma (vector DB).
+LangChain (models: Gemini, or Claude via Vercel AI 
+Gateway), Chroma (vector DB).
 India-first platform. All legal requirements must 
 comply with Indian law first, international second.
 
-## Current Phase — Phase 1 Only
-Build only what Phase 1 needs. Do not build ahead.
+## Current Phase — Phase 2 (started 12 Nov 2026)
+Phase 1 is built. Phase 2 was started on the founder's 
+explicit instruction. Build only what is listed below. 
+Do not build ahead.
 
 ### Phase 1 scope (build this):
 - Auth (Supabase)
@@ -23,7 +26,8 @@ Build only what Phase 1 needs. Do not build ahead.
 - Basic team chat per project
 - All legal pages and compliance features below
 
-### Phase 2 scope (do not build yet):
+### Phase 2 scope:
+Built (all AI code lives in /lib/ai):
 - Shared AI workspace
 - LangChain integration
 - Chroma vector DB
@@ -31,11 +35,20 @@ Build only what Phase 1 needs. Do not build ahead.
 - AI pitch builder
 - Smart split suggestion
 - AI team matchmaking
-- Collective brand pages
-- Enterprise features
+- Collective brand pages (public team pages)
 
-If asked to build a Phase 2 feature, refuse and explain 
-why it belongs in Phase 2. Do not build it anyway.
+Not started (do not build without asking):
+- Enterprise features — not defined yet
+
+AI rules:
+- AI only drafts or suggests. A person always reviews 
+  and submits; AI never sends, signs or moves money
+- Split percentages are computed in code, never taken 
+  from model output
+- Vector search only ranks; rows are always re-read 
+  from Supabase so row level security decides access
+- Never send member names or emails to a model when 
+  role, skills and experience are enough
 
 ## Legal Pages — Build All of These
 Every page must be linked in the footer and 
@@ -53,8 +66,9 @@ Must include:
 - Intellectual property — work produced belongs 
   to the client upon full payment
 - Termination and blacklisting conditions
-- NDA violation consequences — fines and 
-  permanent ban (Phase 2, placeholder for now)
+- NDA violation consequences — suspension or 
+  permanent ban (no fines: the platform cannot 
+  enforce them)
 - Governing law: India, jurisdiction: Pune
 - CollabLance is not liable for disputes between 
   members beyond the platform's dispute process

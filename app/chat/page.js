@@ -28,10 +28,13 @@ function ToolPill({ part }) {
     return <div className="ai-tool-pill ai-tool-pill--error">⚠️ {label} failed: {part.errorText}</div>
   }
   if (part.state === 'output-available') {
+    // Tool results arrive as JSON text
+    let output = part.output
+    if (typeof output === 'string') { try { output = JSON.parse(output) } catch { output = null } }
     let summary = ''
-    if (name === 'searchTeamContext') summary = `${part.output?.results?.length ?? 0} result(s)`
-    if (name === 'postTeamContext') summary = part.output?.posted ? `"${part.output.card?.title}"` : 'failed'
-    if (name === 'listProjects') summary = `${part.output?.projects?.length ?? 0} project(s)`
+    if (name === 'searchTeamContext') summary = `${output?.results?.length ?? 0} result(s)`
+    if (name === 'postTeamContext') summary = output?.posted ? `"${output.card?.title}"` : 'failed'
+    if (name === 'listProjects') summary = `${output?.projects?.length ?? 0} project(s)`
     return <div className="ai-tool-pill ai-tool-pill--done">{label} — {summary}</div>
   }
   return <div className="ai-tool-pill">{label}…</div>

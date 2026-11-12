@@ -6,7 +6,7 @@ A platform where freelancers form named teams, pitch clients together, and track
 
 - **Next.js 16** (App Router) + React 19
 - **Supabase** (Postgres, Auth, Realtime, pgvector)
-- **Vercel AI Gateway** + AI SDK — the in-app AI Assistant (`/chat`)
+- **LangChain** + **Chroma** — AI Assistant (`/chat`), proposal drafts, split suggestions, semantic search and team matching (all in `lib/ai/`)
 - **Razorpay Route** — milestone payments (off until `PAYMENTS_ENABLED=true`)
 
 ## Getting started
@@ -48,11 +48,13 @@ All off until their env vars are set (see `.env.example`): email notifications (
 
 Every table needs RLS rules that hold even if someone calls Supabase directly from the browser (the anon key is public). `supabase/tests/security_hardening_test.sql` attacks the rules on a throwaway local Postgres — run it after changing access rules.
 
-### AI Assistant (`/chat`)
+### AI features
 
-Routed through [Vercel AI Gateway](https://vercel.com/docs/ai-gateway). For local dev, either:
-- `vercel link` + `vercel env pull` (OIDC — matches production), or
-- set `AI_GATEWAY_API_KEY` in `.env.local`.
+All AI code is in `lib/ai/` and uses LangChain. See `.env.example` for the keys.
+
+- **Model:** Gemini with `GEMINI_API_KEY` by default; Claude through Vercel AI Gateway if `AI_GATEWAY_API_KEY` is set.
+- **Vector search:** Chroma. Locally: `pip install chromadb`, `chroma run`, and set `CHROMA_URL=http://localhost:8000`. In production use Chroma Cloud (`CHROMA_API_KEY`, `CHROMA_TENANT`, `CHROMA_DATABASE`). Without Chroma, search and matching fall back to keywords.
+- After connecting Chroma, each user's existing Team Context cards are indexed by `POST /api/context/backfill`. New and edited cards index themselves.
 
 ### MCP server
 
