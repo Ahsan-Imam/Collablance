@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRole } from '@/lib/hooks/useRole'
 import AddRoleButton from '@/components/AddRoleButton/AddRoleButton'
 import './create.css'
+import Icon from '@/components/Icon/Icon'
 
 export default function CreateProjectPage() {
   const [formData, setFormData] = useState({
@@ -80,7 +81,7 @@ export default function CreateProjectPage() {
       <div className="create-project-page">
         <div className="container container--narrow">
           <div className="card create-project__blocked animate-fade-in-up">
-            <div className="create-project__blocked-icon">💼</div>
+            <div className="create-project__blocked-icon"><Icon name="briefcase" size={40} /></div>
             <h1 className="create-project__title">Posting projects needs client access</h1>
             <p className="create-project__subtitle">
               Hiring for something? Add client access to this same account — same email,
@@ -106,7 +107,7 @@ export default function CreateProjectPage() {
 
         {error && (
           <div className="alert alert--error" id="create-project-error">
-            <span>⚠️</span><span>{error}</span>
+            <Icon name="alert" /><span>{error}</span>
           </div>
         )}
 

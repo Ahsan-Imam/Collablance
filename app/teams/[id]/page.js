@@ -5,6 +5,7 @@ import { FOCUS } from '@/lib/site'
 import TeamClient from './TeamClient'
 import '../teams.css'
 import './team.css'
+import Icon from '@/components/Icon/Icon'
 
 async function loadTeam(supabase, id) {
   const { data } = await supabase
@@ -63,7 +64,7 @@ export default async function TeamPage({ params }) {
               <span className="badge badge--neutral">{memberIds.length} member{memberIds.length !== 1 ? 's' : ''}</span>
               <span className="badge badge--neutral">{completed || 0} completed project{completed === 1 ? '' : 's'}</span>
               {avg !== null && (
-                <span className="badge badge--neutral">★ {avg.toFixed(1)} ({ratings.length} review{ratings.length !== 1 ? 's' : ''})</span>
+                <span className="badge badge--neutral"><Icon name="star" size={13} /> {avg.toFixed(1)} ({ratings.length} review{ratings.length !== 1 ? 's' : ''})</span>
               )}
             </div>
           </div>

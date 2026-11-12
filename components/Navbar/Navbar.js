@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { addRole, switchRole, ROLE_CHANGED_EVENT, ROLE_HOME } from '@/lib/roles'
+import Icon from '@/components/Icon/Icon'
 import './Navbar.css'
 
 export default function Navbar() {
@@ -108,10 +109,8 @@ export default function Navbar() {
     <header className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
       <div className="navbar__inner container">
         <Link href="/" className="navbar__logo" id="nav-logo">
-          <span className="navbar__logo-icon">⬡</span>
-          <span className="navbar__logo-text">
-            Collab<span className="navbar__logo-accent">Lance</span>
-          </span>
+          <Icon name="logo" size={26} className="navbar__logo-icon" />
+          <span>CollabLance</span>
         </Link>
 
         <nav className={`navbar__nav ${menuOpen ? 'navbar__nav--open' : ''}`} id="main-nav">
@@ -161,7 +160,7 @@ export default function Navbar() {
                 id="nav-inbox"
                 style={{ position: 'relative' }}
               >
-                📬 Inbox
+                Inbox
                 {pendingInvites > 0 && (
                   <span className="navbar__badge" id="nav-inbox-badge">{pendingInvites}</span>
                 )}

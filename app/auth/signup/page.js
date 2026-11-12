@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import '../auth.css'
+import Icon from '@/components/Icon/Icon'
 
 function GoogleIcon() {
   return (
@@ -117,13 +118,9 @@ function SignupForm() {
   if (success) {
     return (
       <div className="auth-page">
-        <div className="auth-page__bg">
-          <div className="auth-page__orb auth-page__orb--1" />
-          <div className="auth-page__orb auth-page__orb--2" />
-        </div>
         <div className="auth-card animate-scale-in">
           <div className="auth-card__success">
-            <span className="auth-card__success-icon">✉️</span>
+            <span className="auth-card__success-icon"><Icon name="mail" size={44} /></span>
             <h2 className="auth-card__title">Check your email</h2>
             <p className="auth-card__subtitle">
               We&apos;ve sent a confirmation link to <strong>{formData.email}</strong>.
@@ -140,10 +137,6 @@ function SignupForm() {
 
   return (
     <div className="auth-page">
-      <div className="auth-page__bg">
-        <div className="auth-page__orb auth-page__orb--1" />
-        <div className="auth-page__orb auth-page__orb--2" />
-      </div>
       <div className="auth-card animate-scale-in">
         <div className="auth-card__header">
           <h1 className="auth-card__title">Join CollabLance</h1>
@@ -154,8 +147,8 @@ function SignupForm() {
 
         <div className="auth-role" role="radiogroup" aria-label="Account type">
           {[
-            { value: 'freelancer', icon: '🧑‍💻', title: 'Freelancer', desc: 'Join teams and work on projects' },
-            { value: 'client', icon: '💼', title: 'Client', desc: 'Post projects and hire teams' },
+            { value: 'freelancer', icon: 'code', title: 'Freelancer', desc: 'Join teams and work on projects' },
+            { value: 'client', icon: 'briefcase', title: 'Client', desc: 'Post projects and hire teams' },
           ].map(opt => (
             <button
               key={opt.value}
@@ -166,7 +159,7 @@ function SignupForm() {
               onClick={() => setRole(opt.value)}
               id={`signup-role-${opt.value}`}
             >
-              <span className="auth-role__icon">{opt.icon}</span>
+              <span className="auth-role__icon"><Icon name={opt.icon} size={22} /></span>
               <span className="auth-role__title">{opt.title}</span>
               <span className="auth-role__desc">{opt.desc}</span>
             </button>
@@ -176,7 +169,7 @@ function SignupForm() {
 
         {error && (
           <div className="alert alert--error" id="signup-error">
-            <span>⚠️</span>
+            <Icon name="alert" />
             <span>{error}</span>
           </div>
         )}

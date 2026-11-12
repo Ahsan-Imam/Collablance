@@ -5,49 +5,17 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-2xl) var(--space-lg);
-  position: relative;
-  overflow: hidden;
-}
-
-.auth-page__bg {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.auth-page__orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.25;
-}
-
-.auth-page__orb--1 {
-  width: 400px;
-  height: 400px;
-  background: var(--cl-primary-400);
-  top: -100px;
-  right: -50px;
-}
-
-.auth-page__orb--2 {
-  width: 350px;
-  height: 350px;
-  background: var(--cl-accent-400);
-  bottom: -80px;
-  left: -50px;
+  background: var(--cl-bg-secondary);
 }
 
 .auth-card {
   width: 100%;
   max-width: 440px;
   background: var(--cl-surface);
-  border: 1px solid var(--cl-border);
-  border-radius: var(--radius-2xl);
+  border: 1.5px solid var(--cl-ink);
+  border-radius: 16px;
   padding: var(--space-2xl);
-  box-shadow: var(--shadow-xl);
-  position: relative;
-  z-index: 1;
+  box-shadow: 8px 8px 0 var(--cl-primary-100);
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Icon from '@/components/Icon/Icon'
 
 // Styles live in app/projects/projects.css — import it on any page that renders this.
 
@@ -22,12 +23,12 @@ export default function ProjectCard({ project }) {
       </div>
       <p className="project-card__desc">{project.description}</p>
       <div className="project-card__meta">
-        <span className="project-card__budget">💰 {budgetStr}</span>
+        <span className="project-card__budget figure">{budgetStr}</span>
         {project.deadline && (
-          <span className="project-card__deadline">📅 {new Date(project.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+          <span className="project-card__deadline"><Icon name="calendar" size={14} /> {new Date(project.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
         )}
         {project.collectives?.name && (
-          <span className="badge badge--neutral">👥 {project.collectives.name}</span>
+          <span className="badge badge--neutral">{project.collectives.name}</span>
         )}
       </div>
       {project.skills_needed?.length > 0 && (

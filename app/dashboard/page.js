@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useRole } from '@/lib/hooks/useRole'
 import { createClient } from '@/lib/supabase/client'
 import './dashboard.css'
+import Icon from '@/components/Icon/Icon'
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null)
@@ -78,33 +79,33 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {error && <div className="alert alert--error">{error}</div>}
+        {error && <div className="alert alert--error" style={{ marginBottom: 'var(--space-lg)' }}>{error}</div>}
 
         {/* Quick Stats */}
         <div className="dashboard__stats stagger-children">
           <div className="stat-card" id="stat-teams">
-            <div className="stat-card__icon">👥</div>
+            <div className="stat-card__icon"><Icon name="users" size={24} /></div>
             <div className="stat-card__data">
               <span className="stat-card__number">{stats.collective_count}</span>
               <span className="stat-card__label">Teams</span>
             </div>
           </div>
           <div className="stat-card" id="stat-projects">
-            <div className="stat-card__icon">📋</div>
+            <div className="stat-card__icon"><Icon name="file" size={24} /></div>
             <div className="stat-card__data">
               <span className="stat-card__number">{stats.active_projects}</span>
               <span className="stat-card__label">Active Projects</span>
             </div>
           </div>
           <div className="stat-card" id="stat-earnings">
-            <div className="stat-card__icon">💰</div>
+            <div className="stat-card__icon"><Icon name="wallet" size={24} /></div>
             <div className="stat-card__data">
-              <span className="stat-card__number">₹{stats.total_earnings?.toLocaleString() || '0'}</span>
+              <span className="stat-card__number figure">₹{stats.total_earnings?.toLocaleString() || '0'}</span>
               <span className="stat-card__label">Total Earnings</span>
             </div>
           </div>
           <div className="stat-card" id="stat-rating">
-            <div className="stat-card__icon">⭐</div>
+            <div className="stat-card__icon"><Icon name="star" size={24} /></div>
             <div className="stat-card__data">
               <span className="stat-card__number">{stats.avg_rating ? stats.avg_rating.toFixed(1) : '—'}</span>
               <span className="stat-card__label">Avg Rating</span>
@@ -117,28 +118,28 @@ export default function DashboardPage() {
           <h2 className="dashboard__section-title">Quick Actions</h2>
           <div className="dashboard__actions">
             <Link href="/profile" className="action-card" id="action-profile">
-              <div className="action-card__icon">🎯</div>
+              <div className="action-card__icon"><Icon name="target" size={22} /></div>
               <div className="action-card__content">
                 <h3 className="action-card__title">Complete Your Profile</h3>
                 <p className="action-card__desc">Add skills, bio, and portfolio to stand out</p>
               </div>
-              <span className="action-card__arrow">→</span>
+              <span className="action-card__arrow"><Icon name="arrow" /></span>
             </Link>
             <Link href="/teams/create" className="action-card" id="action-create-team">
-              <div className="action-card__icon">🚀</div>
+              <div className="action-card__icon"><Icon name="users" size={22} /></div>
               <div className="action-card__content">
                 <h3 className="action-card__title">Create a Team</h3>
                 <p className="action-card__desc">Form your first team and start pitching</p>
               </div>
-              <span className="action-card__arrow">→</span>
+              <span className="action-card__arrow"><Icon name="arrow" /></span>
             </Link>
             <Link href="/projects" className="action-card" id="action-browse-projects">
-              <div className="action-card__icon">🔍</div>
+              <div className="action-card__icon"><Icon name="search" size={22} /></div>
               <div className="action-card__content">
                 <h3 className="action-card__title">Browse Projects</h3>
                 <p className="action-card__desc">Find projects that match your team&apos;s skills</p>
               </div>
-              <span className="action-card__arrow">→</span>
+              <span className="action-card__arrow"><Icon name="arrow" /></span>
             </Link>
           </div>
         </div>
@@ -148,7 +149,7 @@ export default function DashboardPage() {
           <h2 className="dashboard__section-title">Recent Activity</h2>
           {recentCollectives.length === 0 && recentProjects.length === 0 ? (
             <div className="dashboard__empty">
-              <span className="dashboard__empty-icon">📭</span>
+              <span className="dashboard__empty-icon"><Icon name="inbox" size={40} /></span>
               <p className="dashboard__empty-text">No activity yet</p>
               <p className="dashboard__empty-hint">Start by completing your profile and joining a team.</p>
             </div>
@@ -156,20 +157,20 @@ export default function DashboardPage() {
             <div className="dashboard__activity">
               {recentCollectives.map(m => (
                 <Link key={m.collective_id} href={`/teams/${m.collective_id}`} className="activity-item">
-                  <span className="activity-item__icon">👥</span>
+                  <span className="activity-item__icon"><Icon name="users" /></span>
                   <span className="activity-item__text">
                     <strong>{m.collectives?.name}</strong> — {m.role}
                   </span>
-                  <span className="activity-item__arrow">→</span>
+                  <span className="activity-item__arrow"><Icon name="arrow" size={16} /></span>
                 </Link>
               ))}
               {recentProjects.map(p => (
                 <Link key={p.id} href={`/projects/${p.id}`} className="activity-item">
-                  <span className="activity-item__icon">📋</span>
+                  <span className="activity-item__icon"><Icon name="file" /></span>
                   <span className="activity-item__text">
                     <strong>{p.title}</strong> — {p.status}
                   </span>
-                  <span className="activity-item__arrow">→</span>
+                  <span className="activity-item__arrow"><Icon name="arrow" size={16} /></span>
                 </Link>
               ))}
             </div>

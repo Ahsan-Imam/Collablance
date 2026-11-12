@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import '../auth.css'
+import Icon from '@/components/Icon/Icon'
 
 function GoogleIcon() {
   return (
@@ -92,7 +93,7 @@ function LoginForm() {
 
       {(error || authError) && (
         <div className="alert alert--error" id="login-error">
-          <span>⚠️</span>
+          <Icon name="alert" />
           <span>{error || 'Authentication failed. Please try again.'}</span>
         </div>
       )}
@@ -173,10 +174,6 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <div className="auth-page">
-      <div className="auth-page__bg">
-        <div className="auth-page__orb auth-page__orb--1" />
-        <div className="auth-page__orb auth-page__orb--2" />
-      </div>
       <Suspense fallback={
         <div className="auth-card">
           <div className="skeleton" style={{ height: '300px', borderRadius: '16px' }} />

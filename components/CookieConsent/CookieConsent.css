@@ -6,10 +6,10 @@
   max-width: 640px;
   z-index: var(--z-cookie-banner);
   background: var(--cl-surface);
-  border: 1px solid var(--cl-border);
-  border-radius: var(--radius-2xl);
+  border: 1.5px solid var(--cl-ink);
+  border-radius: 14px;
   padding: var(--space-lg) var(--space-xl);
-  box-shadow: var(--shadow-xl);
+  box-shadow: 6px 6px 0 var(--cl-primary-100);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);

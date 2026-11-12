@@ -102,6 +102,5 @@ a.member-item {
 }
 
 a.member-item:hover {
-  border-color: var(--cl-primary-200);
-  box-shadow: var(--shadow-lg);
+  border-color: var(--cl-primary-600);
 }

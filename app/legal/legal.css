@@ -95,13 +95,13 @@
 }
 
 .legal-highlight {
-  background: var(--cl-primary-50);
-  border-left: 3px solid var(--cl-primary-500);
+  background: var(--cl-bg-secondary);
+  border: 1px solid var(--cl-border);
+  border-radius: 14px;
   padding: var(--space-md) var(--space-lg);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  font-size: 0.9375rem;
-  color: var(--cl-text-secondary);
-  line-height: 1.7;
+  margin: var(--space-md) 0;
+  font-weight: 500;
+  color: var(--cl-text);
 }
 
 [data-theme="dark"] .legal-highlight {

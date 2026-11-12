@@ -39,62 +39,48 @@
 }
 
 /* Collective Card */
+/* Team card — used by /teams, /hire and the dashboard */
 .collective-card {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
+  align-items: center;
+  gap: 1rem;
+  background: var(--cl-surface);
+  border: 1.5px solid var(--cl-border);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--transition-fast);
 }
 
-.collective-card__header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
+.collective-card:hover {
+  border-color: var(--cl-primary-600);
 }
 
 .collective-card__avatar {
-  width: 48px;
-  height: 48px;
+  width: 3rem; height: 3rem;
   border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, var(--cl-primary-400), var(--cl-accent-400));
+  background: var(--cl-primary-100);
+  color: var(--cl-primary-800);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: white;
   flex-shrink: 0;
 }
 
-.collective-card__name {
-  font-size: 1.0625rem;
-  font-weight: 700;
-  color: var(--cl-text);
-}
-
-.collective-card__members {
-  font-size: 0.8125rem;
-  color: var(--cl-text-tertiary);
-}
-
+.collective-card__body { flex: 1; min-width: 0; }
+.collective-card__name { font-weight: 700; font-size: 1rem; color: var(--cl-text); }
 .collective-card__desc {
-  font-size: 0.875rem;
-  color: var(--cl-text-secondary);
-  line-height: 1.6;
+  font-size: 0.8125rem; color: var(--cl-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin: 0.25rem 0;
 }
-
-.collective-card__skills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs);
-}
-
-.collective-card__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--cl-border-light);
-}
+.collective-card__meta { display: flex; align-items: center; gap: 0.625rem; }
+.collective-card__members { display: inline-flex; align-items: center; gap: 4px; font-size: 0.8125rem; color: var(--cl-text-secondary); }
+.collective-card__arrow { color: var(--cl-text-tertiary); flex-shrink: 0; }
 
 /* Empty State */
 .collectives-empty {

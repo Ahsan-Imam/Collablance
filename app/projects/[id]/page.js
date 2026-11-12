@@ -9,6 +9,7 @@ import MilestoneFiles from '@/components/MilestoneFiles/MilestoneFiles'
 import NdaSection from '@/components/NdaSection/NdaSection'
 import '../projects.css'
 import './project.css'
+import Icon from '@/components/Icon/Icon'
 
 const STATUS_LABELS = { open: 'Open', in_progress: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' }
 const STATUS_COLORS = { open: '#059669', in_progress: '#d97706', completed: '#6366f1', cancelled: '#dc2626' }
@@ -73,7 +74,7 @@ function MilestoneForm({ projectId, onAdd, onCancel }) {
 
   return (
     <form onSubmit={handleSubmit} className="card" style={{ padding: 'var(--space-lg)', marginBottom: 'var(--space-md)' }}>
-      {error && <div className="alert alert--error" style={{ marginBottom: '0.75rem' }}>⚠️ {error}</div>}
+      {error && <div className="alert alert--error" style={{ marginBottom: '0.75rem' }}>{error}</div>}
       <div className="input-group" style={{ marginBottom: '0.75rem' }}>
         <label className="input-label" htmlFor="ms-title">Title</label>
         <input id="ms-title" className="input" value={title} onChange={e => setTitle(e.target.value)} required />
@@ -148,7 +149,7 @@ function ApplyForm({ projectId, myTeams, onSubmit }) {
   return (
     <form onSubmit={handleSubmit} className="card animate-fade-in-up" style={{ padding: 'var(--space-lg)', marginTop: 'var(--space-xl)' }}>
       <h2 className="project-detail__section-title" style={{ marginBottom: 'var(--space-sm)' }}>Send a Proposal</h2>
-      {error && <div className="alert alert--error" style={{ marginBottom: '0.75rem' }}>⚠️ {error}</div>}
+      {error && <div className="alert alert--error" style={{ marginBottom: '0.75rem' }}>{error}</div>}
       <div className="input-group" style={{ marginBottom: '0.75rem' }}>
         <label className="input-label" htmlFor="apply-team">Team</label>
         <select id="apply-team" className="input" value={collectiveId} onChange={e => setCollectiveId(e.target.value)} required>
@@ -171,10 +172,10 @@ function ApplyForm({ projectId, myTeams, onSubmit }) {
       </div>
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <button className="btn btn--primary" type="submit" disabled={loading || drafting || !collectiveId}>
-          {loading ? 'Sending…' : '📨 Send Proposal'}
+          {loading ? 'Sending…' : 'Send proposal'}
         </button>
         <button className="btn btn--secondary" type="button" onClick={handleDraft} disabled={loading || drafting || !collectiveId} id="pitch-draft-btn">
-          {drafting ? 'Drafting…' : '✨ Draft with AI'}
+          <Icon name="sparkle" size={16} />{drafting ? 'Drafting…' : 'Draft with AI'}
         </button>
         <span style={{ fontSize: '0.8125rem', color: 'var(--cl-text-tertiary)' }}>AI drafts can be wrong. Check the price and timeline before sending.</span>
       </div>
@@ -265,8 +266,8 @@ function ContractSection({ projectId, collectiveId, teamMembers, userId, isLeade
 
   return (
     <div className="card animate-fade-in-up" style={{ padding: 'var(--space-lg)', marginTop: 'var(--space-xl)' }}>
-      <h2 className="project-detail__section-title" style={{ marginBottom: 'var(--space-sm)' }}>💰 Payment Split Contract</h2>
-      {error && <div className="alert alert--error" style={{ marginBottom: '0.75rem' }}>⚠️ {error}</div>}
+      <h2 className="project-detail__section-title" style={{ marginBottom: 'var(--space-sm)' }}>Payment split contract</h2>
+      {error && <div className="alert alert--error" style={{ marginBottom: '0.75rem' }}>{error}</div>}
 
       {!contract ? (
         isLeader ? (
@@ -297,7 +298,7 @@ function ContractSection({ projectId, collectiveId, teamMembers, userId, isLeade
                 {busy ? 'Working…' : 'Propose Split'}
               </button>
               <button className="btn btn--secondary btn--sm" type="button" onClick={handleSuggest} disabled={busy} id="split-suggest-btn">
-                ✨ Suggest with AI
+                <Icon name="sparkle" size={16} />Suggest with AI
               </button>
               <span style={{ fontSize: '0.75rem', color: 'var(--cl-text-tertiary)' }}>Only a starting point. Change any number before proposing.</span>
             </div>
@@ -313,18 +314,18 @@ function ContractSection({ projectId, collectiveId, teamMembers, userId, isLeade
               return (
                 <div key={s.user_id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
                   <span>{nameFor(s.user_id)} — {s.percent}%</span>
-                  <span>{signed ? '✅ Signed' : '⏳ Pending'}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: signed ? '#065f46' : 'var(--cl-text-secondary)', fontWeight: 600 }}><Icon name={signed ? 'check' : 'clock'} size={15} />{signed ? 'Signed' : 'Pending'}</span>
                 </div>
               )
             })}
           </div>
           {contract.status === 'signed' ? (
-            <span className="badge badge--primary">🔒 Fully signed &amp; locked</span>
+            <span className="badge badge--success"><Icon name="lock" size={13} /> Fully signed and locked</span>
           ) : mySigned || !canSign ? (
             <p style={{ color: 'var(--cl-text-secondary)', fontSize: '0.875rem' }}>Waiting on the rest of the team to sign.</p>
           ) : (
             <button className="btn btn--primary btn--sm" onClick={handleSign} disabled={busy}>
-              {busy ? 'Signing…' : '✍️ Sign Contract'}
+              <Icon name="pen" size={16} />{busy ? 'Signing…' : 'Sign contract'}
             </button>
           )}
         </>
@@ -355,7 +356,7 @@ function ReviewForm({ title, onSubmit }) {
   return (
     <form onSubmit={handleSubmit} className="card" style={{ padding: 'var(--space-lg)', marginBottom: 'var(--space-md)' }}>
       <h3 style={{ marginBottom: '0.5rem' }}>{title}</h3>
-      {error && <div className="alert alert--error" style={{ marginBottom: '0.75rem' }}>⚠️ {error}</div>}
+      {error && <div className="alert alert--error" style={{ marginBottom: '0.75rem' }}>{error}</div>}
       <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.75rem', fontSize: '1.5rem', cursor: 'pointer' }}>
         {[1, 2, 3, 4, 5].map(n => (
           <span key={n} onClick={() => setRating(n)} role="button" aria-label={`${n} stars`}>
@@ -610,7 +611,7 @@ export default function ProjectDetailPage() {
         <div className="container">
           <Link href="/projects" className="project-detail__back">← Back to projects</Link>
           <div className="projects-empty">
-            <div className="projects-empty__icon">🔍</div>
+            <div className="projects-empty__icon"><Icon name="search" size={40} /></div>
             <h2 className="projects-empty__title">Project not found</h2>
             <p className="projects-empty__desc">{error || 'It may have been deleted.'}</p>
           </div>
@@ -658,17 +659,17 @@ export default function ProjectDetailPage() {
           </div>
 
           <aside className="card project-detail__facts">
-            <Fact label="Budget">💰 {formatBudget(project)}</Fact>
-            <Fact label="Deadline">{project.deadline ? `📅 ${formatDate(project.deadline)}` : 'No deadline'}</Fact>
+            <Fact label="Budget"><span className="figure">{formatBudget(project)}</span></Fact>
+            <Fact label="Deadline">{project.deadline ? formatDate(project.deadline) : 'No deadline'}</Fact>
             <Fact label="Team">
               {project.collectives
-                ? <Link href={`/teams/${project.collectives.id}`}>👥 {project.collectives.name}</Link>
+                ? <Link href={`/teams/${project.collectives.id}`}>{project.collectives.name}</Link>
                 : 'Independent'}
             </Fact>
             {project.collective_id && (
               <Fact label="Workspace">
                 <Link href={`/projects/${project.id}/workspace`}>
-                  {project.accepted_at ? '🧠 Open workspace' : '🔒 Workspace (not accepted yet)'}
+                  {project.accepted_at ? 'Open workspace' : 'Workspace (not accepted yet)'}
                 </Link>
               </Fact>
             )}

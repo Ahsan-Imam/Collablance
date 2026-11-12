@@ -7,6 +7,7 @@ import AddRoleButton from '@/components/AddRoleButton/AddRoleButton'
 import ProjectCard from '@/components/ProjectCard/ProjectCard'
 import '../projects/projects.css'
 import './client.css'
+import Icon from '@/components/Icon/Icon'
 
 const FILTER_LABELS = { all: 'All', open: 'Open', in_progress: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' }
 
@@ -49,7 +50,7 @@ export default function ClientPage() {
       <div className="client-page">
         <div className="container container--narrow">
           <div className="card client-page__notice animate-fade-in-up">
-            <div className="client-page__notice-icon">💼</div>
+            <div className="client-page__notice-icon"><Icon name="briefcase" size={28} /></div>
             <h1 className="client-page__title">Hire with this account too</h1>
             <p className="client-page__subtitle">
               Your account is set up for freelancing. Add client access to post projects and hire
@@ -131,7 +132,7 @@ export default function ClientPage() {
 
         {projects.length === 0 ? (
           <div className="projects-empty animate-fade-in-up">
-            <div className="projects-empty__icon">📋</div>
+            <div className="projects-empty__icon"><Icon name="file" size={40} /></div>
             <h2 className="projects-empty__title">No projects yet</h2>
             <p className="projects-empty__desc">Post your first project and teams will be able to find it.</p>
             <Link href="/projects/create" className="btn btn--primary btn--lg" id="client-empty-post">

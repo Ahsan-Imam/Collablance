@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Icon from '@/components/Icon/Icon'
 import './Footer.css'
 
 export default function Footer() {
@@ -11,10 +12,8 @@ export default function Footer() {
           {/* Brand */}
           <div className="footer__brand">
             <Link href="/" className="footer__logo">
-              <span className="footer__logo-icon">⬡</span>
-              <span className="footer__logo-text">
-                Collab<span className="footer__logo-accent">Lance</span>
-              </span>
+              <Icon name="logo" size={24} className="footer__logo-icon" />
+              <span>CollabLance</span>
             </Link>
             <p className="footer__tagline">
               Form teams. Pitch together. Get paid fairly.

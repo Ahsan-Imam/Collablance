@@ -1,4 +1,4 @@
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar/Navbar";
 import Footer from "@/components/Footer/Footer";
@@ -10,6 +10,10 @@ const inter = Inter({
   subsets: ["latin"],
   display: "swap",
 });
+
+// Headings, and figures (money, percentages, counts)
+const display = Space_Grotesk({ variable: "--font-display", subsets: ["latin"], display: "swap" });
+const figures = JetBrains_Mono({ variable: "--font-figures", subsets: ["latin"], display: "swap" });
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://collablance.vercel.app'),
@@ -35,7 +39,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${inter.variable} ${display.variable} ${figures.variable}`}>
       <body>
         <Navbar />
         <main style={{ paddingTop: "4rem" }}>{children}</main>
