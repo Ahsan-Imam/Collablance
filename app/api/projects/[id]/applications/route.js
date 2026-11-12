@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { canAcceptProject } from '@/lib/projectAcceptance'
-import { NextResponse } from 'next/server'
+import { notify } from '@/lib/notify'
+import { NextResponse, after } from 'next/server'
 
-const COLUMNS = 'id,project_id,collective_id,applied_by,message,status,created_at,responded_at,collectives(id,name,avatar_initial,focus_area)'
+const COLUMNS = 'id,project_id,collective_id,applied_by,message,quote_amount,timeline_days,status,created_at,responded_at,collectives(id,name,avatar_initial,focus_area)'
 
 // GET /api/projects/[id]/applications — the project owner sees every
 // application; anyone else sees only the applications from a team they
@@ -30,12 +31,17 @@ export async function POST(request, { params }) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
-  const { collective_id: collectiveId, message } = await request.json()
+  const { collective_id: collectiveId, message, quote_amount, timeline_days } = await request.json()
   if (!collectiveId) return NextResponse.json({ error: 'collective_id is required' }, { status: 400 })
+  const quote = Number(quote_amount)
+  const days = Number(timeline_days)
+  if (!(quote > 0) || !Number.isInteger(days) || days < 1) {
+    return NextResponse.json({ error: 'A proposal needs your price (₹) and a timeline in whole days' }, { status: 400 })
+  }
 
   const { data: project, error: projErr } = await supabase
     .from('projects')
-    .select('id, status, collective_id, owner_id')
+    .select('id, title, status, collective_id, owner_id')
     .eq('id', id)
     .maybeSingle()
   if (projErr) return NextResponse.json({ error: projErr.message }, { status: 500 })
@@ -50,7 +56,7 @@ export async function POST(request, { params }) {
 
   const { data, error } = await supabase
     .from('project_applications')
-    .insert({ project_id: id, collective_id: collectiveId, applied_by: user.id, message: message?.trim() || null })
+    .insert({ project_id: id, collective_id: collectiveId, applied_by: user.id, message: message?.trim() || null, quote_amount: quote, timeline_days: days })
     .select(COLUMNS)
     .single()
 
@@ -58,5 +64,6 @@ export async function POST(request, { params }) {
     if (error.code === '23505') return NextResponse.json({ error: 'Your team already has a pending application for this project' }, { status: 409 })
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
+  after(() => notify([project.owner_id], `New proposal for ${project.title}`, `${data.collectives?.name || 'A team'} sent a proposal: ₹${quote.toLocaleString('en-IN')}, ${days} day${days === 1 ? '' : 's'}.`, `/projects/${id}`))
   return NextResponse.json({ data }, { status: 201 })
 }

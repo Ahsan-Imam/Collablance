@@ -13,6 +13,8 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
+  const [skill, setSkill] = useState('')
+  const [minBudget, setMinBudget] = useState('')
   const [error, setError] = useState('')
   const { role } = useRole()
   const isClient = role === 'client'
@@ -21,12 +23,14 @@ export default function ProjectsPage() {
     const params = new URLSearchParams()
     if (filter !== 'all') params.set('status', filter)
     if (search.trim()) params.set('q', search.trim())
+    if (skill.trim()) params.set('skill', skill.trim())
+    if (minBudget) params.set('min_budget', minBudget)
 
     fetch(`/api/projects?${params}`)
       .then(r => r.json())
       .then(json => { setError(json.error || ''); setProjects(json.data || []); setLoading(false) })
       .catch(() => { setError('Failed to load projects'); setLoading(false) })
-  }, [filter, search])
+  }, [filter, search, skill, minBudget])
 
   return (
     <div className="projects-page">
@@ -50,6 +54,14 @@ export default function ProjectsPage() {
             placeholder="Search projects..."
             value={search} onChange={(e) => { setSearch(e.target.value); setLoading(true) }}
             id="project-search" />
+          <input type="text" className="input" style={{ maxWidth: 180 }}
+            placeholder="Skill, e.g. Shopify" aria-label="Filter by skill"
+            value={skill} onChange={(e) => { setSkill(e.target.value); setLoading(true) }}
+            id="project-skill-filter" />
+          <input type="number" min="0" className="input" style={{ maxWidth: 160 }}
+            placeholder="Min budget (₹)" aria-label="Minimum budget in rupees"
+            value={minBudget} onChange={(e) => { setMinBudget(e.target.value); setLoading(true) }}
+            id="project-budget-filter" />
           <div className="projects-page__filter-tabs">
             {Object.entries(FILTER_LABELS).map(([val, label]) => (
               <button key={val}
@@ -75,7 +87,7 @@ export default function ProjectsPage() {
             <div className="projects-empty__icon">📋</div>
             <h2 className="projects-empty__title">No projects found</h2>
             <p className="projects-empty__desc">
-              {search || filter !== 'all'
+              {search || skill || minBudget || filter !== 'all'
                 ? 'Try clearing your filters.'
                 : isClient ? 'Be the first to post a project!' : 'Check back soon — clients post new projects here.'}
             </p>

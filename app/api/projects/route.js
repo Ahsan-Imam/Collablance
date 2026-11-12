@@ -26,6 +26,11 @@ export async function GET(request) {
   if (collectiveId) query = query.eq('collective_id', collectiveId)
   if (mine && user) query = query.eq('owner_id', user.id)
   if (search) query = query.ilike('title', `%${escapeLike(search)}%`)
+  // shortcut: exact, case-sensitive match on free-text skills; normalise skills to lowercase if this misses too much
+  const skill = searchParams.get('skill')
+  if (skill) query = query.contains('skills_needed', [skill])
+  const minBudget = Number(searchParams.get('min_budget'))
+  if (minBudget > 0) query = query.gte('budget_max', minBudget)
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

@@ -7,7 +7,7 @@ A platform where freelancers form named teams, pitch clients together, and track
 - **Next.js 16** (App Router) + React 19
 - **Supabase** (Postgres, Auth, Realtime, pgvector)
 - **Vercel AI Gateway** + AI SDK — the in-app AI Assistant (`/chat`)
-- **Razorpay** — payments (integration pending, see `guardrail.md`)
+- **Razorpay Route** — milestone payments (off until `PAYMENTS_ENABLED=true`)
 
 ## Getting started
 
@@ -31,6 +31,20 @@ supabase db push --remote             # apply it
 ```
 
 To change the schema: `supabase migration new <name>`, write the SQL in the new file, then `db push --remote`. Never edit a migration that's already been pushed — add a new one.
+
+### Tests
+
+```bash
+npm test   # money maths, webhook signature check, milestone status rules
+```
+
+### Optional services
+
+All off until their env vars are set (see `.env.example`): email notifications (Resend: `RESEND_API_KEY`, `EMAIL_FROM`), analytics (Plausible: `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`), payments (`PAYMENTS_ENABLED`).
+
+### Admins and disputes
+
+`/admin` lists disputed milestones and records rulings. Make someone an admin in the Supabase SQL editor: `insert into platform_admins values ('<their user id>');`
 
 Every table needs RLS rules that hold even if someone calls Supabase directly from the browser (the anon key is public). `supabase/tests/security_hardening_test.sql` attacks the rules on a throwaway local Postgres — run it after changing access rules.
 

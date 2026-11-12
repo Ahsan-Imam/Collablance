@@ -149,13 +149,6 @@ export default function Navbar() {
                 Projects
               </Link>
               <Link
-                href="/chat"
-                className={`navbar__link ${isActive('/chat') ? 'navbar__link--active' : ''}`}
-                id="nav-chat"
-              >
-                Chat
-              </Link>
-              <Link
                 href="/inbox"
                 className={`navbar__link ${isActive('/inbox') ? 'navbar__link--active' : ''}`}
                 id="nav-inbox"
@@ -196,8 +189,11 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/#features" className="navbar__link" id="nav-features">
-                Features
+              <Link href="/hire" className={`navbar__link ${isActive('/hire') ? 'navbar__link--active' : ''}`} id="nav-hire">
+                Browse Teams
+              </Link>
+              <Link href="/pricing" className={`navbar__link ${isActive('/pricing') ? 'navbar__link--active' : ''}`} id="nav-pricing">
+                Pricing
               </Link>
               <Link href="/#how-it-works" className="navbar__link" id="nav-how">
                 How it Works

@@ -128,6 +128,10 @@ export default function ProfilePage() {
   // name, location, about (bio) and website (portfolio_url)
   // The form follows the active mode
   const isClient = role === 'client'
+  const profileFields = isClient
+    ? ['full_name', 'bio', 'location']
+    : ['full_name', 'bio', 'location', 'skills', 'portfolio_url', 'hourly_rate', 'experience_years']
+  const completeness = Math.round(100 * profileFields.filter(f => String(profile[f] ?? '').length > 0).length / profileFields.length)
 
   return (
     <div className="profile-page">
@@ -161,6 +165,13 @@ export default function ProfilePage() {
         </div>
 
         {error && <div className="alert alert--error">{error}</div>}
+
+        {completeness < 100 && (
+          <label className="card" style={{ display: 'block', padding: 'var(--space-md)', marginBottom: 'var(--space-md)', fontSize: '0.875rem' }} id="profile-completeness">
+            Your profile is {completeness}% complete. {isClient ? 'Teams' : 'Clients'} trust complete profiles more.
+            <progress value={completeness} max="100" style={{ display: 'block', width: '100%', marginTop: 6 }} />
+          </label>
+        )}
 
         <form onSubmit={handleSave} className="profile-form card animate-fade-in-up" style={{ animationDelay: '100ms' }} id="profile-form">
           <div className="profile-form__grid">

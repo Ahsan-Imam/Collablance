@@ -39,8 +39,10 @@ export async function proxy(request) {
   } = await supabase.auth.getUser()
 
   // Protected routes — redirect to login if not authenticated
-  const protectedPaths = ['/dashboard', '/client', '/profile', '/collectives', '/teams', '/projects', '/chat', '/context', '/inbox']
-  const isProtected = protectedPaths.some((path) =>
+  const protectedPaths = ['/dashboard', '/client', '/profile', '/collectives', '/teams', '/projects', '/chat', '/context', '/inbox', '/admin']
+  // A team's own page is public (shareable, indexable); the list and create pages aren't
+  const isPublicTeamPage = /^\/teams\/(?!create$)[^/]+$/.test(request.nextUrl.pathname)
+  const isProtected = !isPublicTeamPage && protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   )
 

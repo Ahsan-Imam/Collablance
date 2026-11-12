@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { canAcceptProject } from '@/lib/projectAcceptance'
 import { getSignedContract, CONTRACT_REQUIRED_ERROR } from '@/lib/contracts'
-import { NextResponse } from 'next/server'
+import { notify } from '@/lib/notify'
+import { NextResponse, after } from 'next/server'
 
 // PATCH /api/applications/[id] — accept/reject (project owner) or withdraw
 // (the applying team's owner/admin). Accepting assigns the project to that
@@ -20,7 +21,7 @@ export async function PATCH(request, { params }) {
 
   const { data: application, error: fetchErr } = await supabase
     .from('project_applications')
-    .select('id, project_id, collective_id, applied_by, status, projects(owner_id, status, collective_id)')
+    .select('id, project_id, collective_id, applied_by, status, projects(owner_id, title, status, collective_id)')
     .eq('id', id)
     .maybeSingle()
   if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 })
@@ -45,6 +46,7 @@ export async function PATCH(request, { params }) {
       .select('id, status, responded_at')
       .single()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (action === 'reject') after(() => notify([application.applied_by], `Proposal not selected: ${application.projects.title}`, 'The client chose not to go ahead with your team\'s proposal.', '/projects'))
     return NextResponse.json({ data })
   }
 
@@ -85,5 +87,6 @@ export async function PATCH(request, { params }) {
     .eq('status', 'pending')
     .neq('id', id)
 
+  after(() => notify([application.applied_by], `Proposal accepted: ${application.projects.title}`, 'The client accepted your team\'s proposal. The project workspace is open.', `/projects/${application.project_id}`))
   return NextResponse.json({ data: updatedApplication })
 }

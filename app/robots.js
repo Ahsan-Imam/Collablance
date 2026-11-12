@@ -4,7 +4,7 @@ export default function robots() {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/dashboard', '/client', '/profile', '/teams', '/collectives', '/projects', '/chat', '/context', '/auth', '/api'],
+        disallow: ['/dashboard', '/client', '/profile', '/teams/create', '/collectives', '/projects', '/chat', '/context', '/inbox', '/admin', '/auth', '/api'],
       },
     ],
     sitemap: 'https://collablance.vercel.app/sitemap.xml',
