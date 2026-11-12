@@ -7,7 +7,7 @@ export default function PrivacyPage() {
   return (
     <>
       <div className="legal-header">
-        <p className="legal-updated">Last updated: October 2024</p>
+        <p className="legal-updated">Last updated: November 2026</p>
         <h1 className="legal-title">Privacy Policy</h1>
         <p className="legal-subtitle">
           We take your privacy seriously. This policy explains what data we collect, 
@@ -47,7 +47,10 @@ export default function PrivacyPage() {
           <ul>
             <li><strong>Razorpay:</strong> For payment processing (governed by Razorpay&apos;s privacy policy)</li>
             <li><strong>Supabase:</strong> For data storage and authentication (data stored securely)</li>
-            <li><strong>Claude API (Anthropic):</strong> For AI-powered features (when launched in Phase 2)</li>
+            <li><strong>Google (Gemini API):</strong> For AI features. When you use the AI Assistant, an AI proposal draft or an AI split suggestion, the relevant project details and team members&apos; skills and experience are sent to generate the result (names are left out of drafts and split suggestions). Team Context cards, open project descriptions and freelancer skills and bios are also sent to be converted into a numeric form for search and matching</li>
+            <li><strong>Chroma:</strong> Stores that numeric form, with record IDs, to power semantic search and team matching. The original text stays in our database</li>
+            <li><strong>Anthropic (via Vercel AI Gateway):</strong> May be used in place of Google for AI features</li>
+            <li><strong>Resend:</strong> For sending notification emails to your email address</li>
           </ul>
           <div className="legal-highlight">
             We never sell your data to third parties. Ever. No exceptions.

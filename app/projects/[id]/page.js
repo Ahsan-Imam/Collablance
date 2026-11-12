@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import FundMilestoneButton from '@/components/FundMilestoneButton/FundMilestoneButton'
 import MilestoneFiles from '@/components/MilestoneFiles/MilestoneFiles'
+import NdaSection from '@/components/NdaSection/NdaSection'
 import '../projects.css'
 import './project.css'
 
@@ -99,13 +100,37 @@ function MilestoneForm({ projectId, onAdd, onCancel }) {
   )
 }
 
-function ApplyForm({ myTeams, onSubmit }) {
+function ApplyForm({ projectId, myTeams, onSubmit }) {
   const [collectiveId, setCollectiveId] = useState(myTeams[0]?.id || '')
   const [message, setMessage] = useState('')
   const [quote, setQuote] = useState('')
   const [days, setDays] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [drafting, setDrafting] = useState(false)
+
+  // Fills the form with an AI draft. Nothing is sent until the leader submits.
+  const handleDraft = async () => {
+    if ((message || quote || days) && !confirm('Replace what you’ve written with an AI draft?')) return
+    setError('')
+    setDrafting(true)
+    try {
+      const res = await fetch(`/api/projects/${projectId}/pitch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ collective_id: collectiveId }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      setMessage(json.data.message)
+      setQuote(String(json.data.quote_amount))
+      setDays(String(json.data.timeline_days))
+    } catch (err) {
+      setError(err.message || 'Could not draft a proposal')
+    } finally {
+      setDrafting(false)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -144,9 +169,15 @@ function ApplyForm({ myTeams, onSubmit }) {
         <label className="input-label" htmlFor="apply-message">Message (optional)</label>
         <textarea id="apply-message" className="input textarea" rows={3} placeholder="Why your team is a good fit…" value={message} onChange={e => setMessage(e.target.value)} />
       </div>
-      <button className="btn btn--primary" type="submit" disabled={loading || !collectiveId}>
-        {loading ? 'Sending…' : '📨 Send Proposal'}
-      </button>
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <button className="btn btn--primary" type="submit" disabled={loading || drafting || !collectiveId}>
+          {loading ? 'Sending…' : '📨 Send Proposal'}
+        </button>
+        <button className="btn btn--secondary" type="button" onClick={handleDraft} disabled={loading || drafting || !collectiveId} id="pitch-draft-btn">
+          {drafting ? 'Drafting…' : '✨ Draft with AI'}
+        </button>
+        <span style={{ fontSize: '0.8125rem', color: 'var(--cl-text-tertiary)' }}>AI drafts can be wrong. Check the price and timeline before sending.</span>
+      </div>
     </form>
   )
 }
@@ -157,6 +188,29 @@ function ContractSection({ projectId, collectiveId, teamMembers, userId, isLeade
   const [splitInputs, setSplitInputs] = useState({})
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [reasons, setReasons] = useState({})
+
+  // Fills the inputs with an AI suggestion. The leader can change every number,
+  // and nothing is proposed until they press "Propose Split".
+  const handleSuggest = async () => {
+    setError('')
+    setBusy(true)
+    try {
+      const res = await fetch(`/api/projects/${projectId}/split-suggestion`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ collective_id: collectiveId }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      setSplitInputs(Object.fromEntries(json.data.map(s => [s.user_id, String(s.percent)])))
+      setReasons(Object.fromEntries(json.data.map(s => [s.user_id, s.reason])))
+    } catch (err) {
+      setError(err.message || 'Could not suggest a split')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   useEffect(() => {
     fetch(`/api/projects/${projectId}/contracts?collective_id=${collectiveId}`)
@@ -222,7 +276,10 @@ function ContractSection({ projectId, collectiveId, teamMembers, userId, isLeade
             </p>
             {teamMembers.map(m => (
               <div key={m.user_id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: '0.5rem' }}>
-                <span style={{ flex: 1 }}>{m.profiles?.full_name || 'Member'}</span>
+                <span style={{ flex: 1 }}>
+                  {m.profiles?.full_name || 'Member'}
+                  {reasons[m.user_id] && <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--cl-text-tertiary)' }}>{reasons[m.user_id]}</span>}
+                </span>
                 <input
                   type="number" min="1" max="100" className="input" style={{ width: 90 }}
                   value={splitInputs[m.user_id] || ''}
@@ -235,9 +292,15 @@ function ContractSection({ projectId, collectiveId, teamMembers, userId, isLeade
             <p style={{ fontSize: '0.8125rem', color: allFilled && total === 100 ? 'var(--cl-primary-600)' : '#dc2626', marginBottom: 'var(--space-md)' }}>
               Total: {total}%{!allFilled ? ' — every member needs a number' : total !== 100 ? ' — must equal 100%' : ' ✓'}
             </p>
-            <button className="btn btn--primary btn--sm" type="submit" disabled={busy || !allFilled || total !== 100}>
-              {busy ? 'Proposing…' : 'Propose Split'}
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <button className="btn btn--primary btn--sm" type="submit" disabled={busy || !allFilled || total !== 100}>
+                {busy ? 'Working…' : 'Propose Split'}
+              </button>
+              <button className="btn btn--secondary btn--sm" type="button" onClick={handleSuggest} disabled={busy} id="split-suggest-btn">
+                ✨ Suggest with AI
+              </button>
+              <span style={{ fontSize: '0.75rem', color: 'var(--cl-text-tertiary)' }}>Only a starting point. Change any number before proposing.</span>
+            </div>
           </form>
         ) : (
           <p style={{ color: 'var(--cl-text-secondary)' }}>Your team leader hasn&apos;t proposed a payment split yet.</p>
@@ -653,7 +716,7 @@ export default function ProjectDetailPage() {
         </div>
 
         {!isOwner && project.status === 'open' && !project.collective_id && myOwnedTeams.some(t => !pendingTeamIds.has(t.id)) && (
-          <ApplyForm myTeams={myOwnedTeams.filter(t => !pendingTeamIds.has(t.id))} onSubmit={handleApply} />
+          <ApplyForm projectId={id} myTeams={myOwnedTeams.filter(t => !pendingTeamIds.has(t.id))} onSubmit={handleApply} />
         )}
 
         {project.status === 'open' && !project.collective_id && (isOwner || applications.length > 0) && (
@@ -715,6 +778,10 @@ export default function ProjectDetailPage() {
             isLeader={isContractTeamLeader}
             canSign={isTeamMember}
           />
+        )}
+
+        {project.collective_id && (isOwner || isTeamMember) && (
+          <NdaSection projectId={id} userId={userId} isOwner={isOwner} />
         )}
 
         {(isOwner || isTeamMember) && (

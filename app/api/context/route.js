@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { generateEmbedding, buildEmbeddingText } from '@/lib/embeddings'
+import { indexContextCards } from '@/lib/ai/contextSearch'
 import { verifyContextScope } from '@/lib/contextEligibility'
 import { NextResponse } from 'next/server'
 
@@ -50,10 +50,6 @@ export async function POST(request) {
   const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Member'
   const avatarInitial = displayName[0]?.toUpperCase() || 'M'
 
-  // Generate embedding (non-blocking fail — card still saves if OpenAI is down/unconfigured)
-  const embeddingText = buildEmbeddingText({ section, title, content, tags, display_name: displayName })
-  const embedding = await generateEmbedding(embeddingText)
-
   const { data, error } = await supabase
     .from('team_context')
     .insert({
@@ -66,16 +62,13 @@ export async function POST(request) {
       tags: tags || [],
       collective_id: collective_id || null,
       project_id: project_id || null,
-      embedding: embedding ?? null,
-      embedding_text: embedding ? embeddingText : null,
     })
     .select('id,user_id,display_name,avatar_initial,section,title,content,tags,is_pinned,collective_id,project_id,updated_at,created_at')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json({
-    data,
-    embedded: embedding !== null,
-  }, { status: 201 })
+  // Index for semantic search; the card is saved either way
+  const embedded = await indexContextCards([data])
+  return NextResponse.json({ data, embedded }, { status: 201 })
 }
