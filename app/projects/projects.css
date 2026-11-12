@@ -90,9 +90,8 @@
 }
 
 .project-card__budget {
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--cl-primary-600);
+  font-size: 0.9375rem;
+  color: var(--cl-text);
   white-space: nowrap;
 }
 
@@ -179,8 +178,11 @@
 }
 
 .project-card__deadline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 0.8125rem;
-  color: var(--cl-text-tertiary);
+  color: var(--cl-text-secondary);
 }
 
 .project-card__skills {

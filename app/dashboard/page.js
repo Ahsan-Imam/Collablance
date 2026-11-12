@@ -79,7 +79,7 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {error && <div className="alert alert--error">{error}</div>}
+        {error && <div className="alert alert--error" style={{ marginBottom: 'var(--space-lg)' }}>{error}</div>}
 
         {/* Quick Stats */}
         <div className="dashboard__stats stagger-children">

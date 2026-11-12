@@ -150,6 +150,8 @@ html {
 }
 
 body {
+  /* native checkboxes, radios, range and progress bars in the brand colour */
+  accent-color: var(--cl-primary-600);
   font-family: var(--font-sans);
   color: var(--cl-text);
   background-color: var(--cl-bg);
