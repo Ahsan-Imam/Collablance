@@ -32,29 +32,27 @@ export default function HomePage() {
               Post a Project
               <span className="hero__cta-arrow">→</span>
             </Link>
-            <Link href="/#how-it-works" className="btn btn--secondary btn--xl" id="clients-hero-learn">
-              How Hiring Works
+            <Link href="/hire" className="btn btn--secondary btn--xl" id="clients-hero-browse">
+              Browse Teams
             </Link>
           </div>
           <p className="hero__client-link animate-fade-in-up" style={{ animationDelay: '250ms' }}>
             Freelancer? <Link href="/for-freelancers" id="hero-for-freelancers">Start or join a team →</Link>
           </p>
-          <div className="hero__stats animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-            <div className="hero__stat">
-              <span className="hero__stat-number">₹0</span>
-              <span className="hero__stat-label">To post a project</span>
-            </div>
-            <div className="hero__stat-divider" />
-            <div className="hero__stat">
-              <span className="hero__stat-number">1</span>
-              <span className="hero__stat-label">Team, one contact</span>
-            </div>
-            <div className="hero__stat-divider" />
-            <div className="hero__stat">
-              <span className="hero__stat-number">100%</span>
-              <span className="hero__stat-label">Team-signed payout splits</span>
-            </div>
-          </div>
+          {/* Illustration of the split contract every team signs — labelled as an example */}
+          <figure className="hero__split animate-fade-in-up" style={{ animationDelay: '300ms' }} id="hero-split-example">
+            <figcaption className="hero__split-title">
+              Payout split <span className="badge badge--primary">Signed &amp; locked</span>
+            </figcaption>
+            <ul className="hero__split-rows">
+              <li><span>Designer</span><span>40% · Signed</span></li>
+              <li><span>Developer</span><span>40% · Signed</span></li>
+              <li><span>Writer</span><span>20% · Signed</span></li>
+            </ul>
+            <p className="hero__split-note">
+              Example. Every member signs the split before the team can take your project, so nobody argues about money mid-way.
+            </p>
+          </figure>
         </div>
       </section>
 
@@ -128,7 +126,7 @@ export default function HomePage() {
             <span className="badge badge--primary">How Hiring Works</span>
             <h2 className="section-title">From idea to delivered project</h2>
             <p className="section-subtitle">
-              Four steps, and you only pay for approved work.
+              Four steps. Posting is free — see <Link href="/pricing">pricing</Link>.
             </p>
           </div>
           <div className="steps">

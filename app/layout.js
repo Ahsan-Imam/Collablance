@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar/Navbar";
 import Footer from "@/components/Footer/Footer";
 import CookieConsent from "@/components/CookieConsent/CookieConsent";
+import Analytics from "@/components/Analytics/Analytics";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -11,6 +12,7 @@ const inter = Inter({
 });
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://collablance.vercel.app'),
   title: "CollabLance — Freelancer Teams, Better Together",
   description:
     "Form freelancer teams, pitch clients together, and agree payment splits before work starts. India's platform for collaborative freelancing.",
@@ -39,6 +41,7 @@ export default function RootLayout({ children }) {
         <main style={{ paddingTop: "4rem" }}>{children}</main>
         <Footer />
         <CookieConsent />
+        <Analytics />
       </body>
     </html>
   );

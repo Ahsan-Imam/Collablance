@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import FundMilestoneButton from '@/components/FundMilestoneButton/FundMilestoneButton'
+import MilestoneFiles from '@/components/MilestoneFiles/MilestoneFiles'
 import '../projects.css'
 import './project.css'
 
@@ -34,8 +35,8 @@ function Fact({ label, children }) {
   )
 }
 
-const MILESTONE_STATUS_LABELS = { pending: 'Pending', submitted: 'Submitted', approved: 'Approved', paid: 'Paid', disputed: 'Disputed' }
-const MILESTONE_STATUS_COLORS = { pending: '#6b7280', submitted: '#d97706', approved: '#059669', paid: '#6366f1', disputed: '#dc2626' }
+const MILESTONE_STATUS_LABELS = { pending: 'Pending', submitted: 'Submitted', approved: 'Approved', paid: 'Paid', disputed: 'Disputed', refunded: 'Refunded' }
+const MILESTONE_STATUS_COLORS = { pending: '#6b7280', submitted: '#d97706', approved: '#059669', paid: '#6366f1', disputed: '#dc2626', refunded: '#6b7280' }
 
 function Stars({ value }) {
   return <span aria-label={`${value} out of 5 stars`}>{'★'.repeat(value)}{'☆'.repeat(5 - value)}</span>
@@ -101,6 +102,8 @@ function MilestoneForm({ projectId, onAdd, onCancel }) {
 function ApplyForm({ myTeams, onSubmit }) {
   const [collectiveId, setCollectiveId] = useState(myTeams[0]?.id || '')
   const [message, setMessage] = useState('')
+  const [quote, setQuote] = useState('')
+  const [days, setDays] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -109,7 +112,7 @@ function ApplyForm({ myTeams, onSubmit }) {
     setError('')
     setLoading(true)
     try {
-      await onSubmit({ collective_id: collectiveId, message })
+      await onSubmit({ collective_id: collectiveId, message, quote_amount: quote, timeline_days: days })
     } catch (err) {
       setError(err.message || 'Failed to apply')
     } finally {
@@ -119,7 +122,7 @@ function ApplyForm({ myTeams, onSubmit }) {
 
   return (
     <form onSubmit={handleSubmit} className="card animate-fade-in-up" style={{ padding: 'var(--space-lg)', marginTop: 'var(--space-xl)' }}>
-      <h2 className="project-detail__section-title" style={{ marginBottom: 'var(--space-sm)' }}>Apply as a Team</h2>
+      <h2 className="project-detail__section-title" style={{ marginBottom: 'var(--space-sm)' }}>Send a Proposal</h2>
       {error && <div className="alert alert--error" style={{ marginBottom: '0.75rem' }}>⚠️ {error}</div>}
       <div className="input-group" style={{ marginBottom: '0.75rem' }}>
         <label className="input-label" htmlFor="apply-team">Team</label>
@@ -127,12 +130,22 @@ function ApplyForm({ myTeams, onSubmit }) {
           {myTeams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
         </select>
       </div>
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
+        <div className="input-group" style={{ flex: 1 }}>
+          <label className="input-label" htmlFor="apply-quote">Your price (₹)</label>
+          <input id="apply-quote" type="number" min="1" className="input" value={quote} onChange={e => setQuote(e.target.value)} required />
+        </div>
+        <div className="input-group" style={{ flex: 1 }}>
+          <label className="input-label" htmlFor="apply-days">Timeline (days)</label>
+          <input id="apply-days" type="number" min="1" step="1" className="input" value={days} onChange={e => setDays(e.target.value)} required />
+        </div>
+      </div>
       <div className="input-group" style={{ marginBottom: '0.75rem' }}>
         <label className="input-label" htmlFor="apply-message">Message (optional)</label>
         <textarea id="apply-message" className="input textarea" rows={3} placeholder="Why your team is a good fit…" value={message} onChange={e => setMessage(e.target.value)} />
       </div>
       <button className="btn btn--primary" type="submit" disabled={loading || !collectiveId}>
-        {loading ? 'Applying…' : '📨 Apply'}
+        {loading ? 'Sending…' : '📨 Send Proposal'}
       </button>
     </form>
   )
@@ -313,7 +326,6 @@ export default function ProjectDetailPage() {
   const [reviews, setReviews] = useState([])
   const [myOwnedTeams, setMyOwnedTeams] = useState([])
   const [applications, setApplications] = useState([])
-  const [appliedTeamIds, setAppliedTeamIds] = useState(new Set())
   const [applicationBusyId, setApplicationBusyId] = useState(null)
   const [teamMembers, setTeamMembers] = useState([])
 
@@ -377,15 +389,16 @@ export default function ProjectDetailPage() {
       .catch(() => {})
   }, [contractCollectiveId])
 
-  const handleApply = async ({ collective_id: collectiveId, message }) => {
+  const handleApply = async (proposal) => {
     const res = await fetch(`/api/projects/${id}/applications`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ collective_id: collectiveId, message }),
+      body: JSON.stringify(proposal),
     })
     const json = await res.json()
     if (!res.ok) throw new Error(json.error)
-    setAppliedTeamIds(prev => new Set(prev).add(collectiveId))
+    // Shows the team its own proposal, and opens the payout-split step
+    setApplications(prev => [json.data, ...prev])
   }
 
   const handleApplication = async (applicationId, action) => {
@@ -544,6 +557,8 @@ export default function ProjectDetailPage() {
   }
 
   const isOwner = userId && userId === project.owner_id
+  // Teams with a proposal still waiting on the client can't send a second one
+  const pendingTeamIds = new Set(applications.filter(a => a.status === 'pending').map(a => a.collective_id))
   const ownerName = project.owner?.full_name || 'Project owner'
 
   return (
@@ -637,15 +652,15 @@ export default function ProjectDetailPage() {
           </aside>
         </div>
 
-        {!isOwner && project.status === 'open' && !project.collective_id && myOwnedTeams.length > 0 && (
-          <ApplyForm myTeams={myOwnedTeams} onSubmit={handleApply} />
+        {!isOwner && project.status === 'open' && !project.collective_id && myOwnedTeams.some(t => !pendingTeamIds.has(t.id)) && (
+          <ApplyForm myTeams={myOwnedTeams.filter(t => !pendingTeamIds.has(t.id))} onSubmit={handleApply} />
         )}
 
-        {isOwner && project.status === 'open' && !project.collective_id && (
+        {project.status === 'open' && !project.collective_id && (isOwner || applications.length > 0) && (
           <div className="card animate-fade-in-up" style={{ padding: 'var(--space-lg)', marginTop: 'var(--space-xl)' }}>
-            <h2 className="project-detail__section-title" style={{ marginBottom: 'var(--space-md)' }}>Applications</h2>
+            <h2 className="project-detail__section-title" style={{ marginBottom: 'var(--space-md)' }}>{isOwner ? 'Proposals' : 'Your team’s proposal'}</h2>
             {applications.length === 0 ? (
-              <p style={{ color: 'var(--cl-text-secondary)' }}>No applications yet.</p>
+              <p style={{ color: 'var(--cl-text-secondary)' }}>No proposals yet.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
                 {applications.map(a => (
@@ -655,16 +670,31 @@ export default function ProjectDetailPage() {
                       <div style={{ fontWeight: 600 }}>
                         <Link href={`/teams/${a.collectives?.id}`}>{a.collectives?.name}</Link>
                       </div>
+                      {a.quote_amount && (
+                        <div style={{ fontSize: '0.875rem' }}>
+                          ₹{Number(a.quote_amount).toLocaleString('en-IN')} · {a.timeline_days} day{a.timeline_days === 1 ? '' : 's'}
+                        </div>
+                      )}
                       {a.message && <div style={{ fontSize: '0.8125rem', color: 'var(--cl-text-secondary)' }}>{a.message}</div>}
                     </div>
                     {a.status === 'pending' ? (
                       <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-                        <button className="btn btn--primary btn--sm" disabled={applicationBusyId === a.id} onClick={() => handleApplication(a.id, 'accept')}>
-                          Accept
-                        </button>
-                        <button className="btn btn--ghost btn--sm" disabled={applicationBusyId === a.id} onClick={() => handleApplication(a.id, 'reject')}>
-                          Reject
-                        </button>
+                        {isOwner ? (
+                          <>
+                            <button className="btn btn--primary btn--sm" disabled={applicationBusyId === a.id} onClick={() => handleApplication(a.id, 'accept')}>
+                              Accept
+                            </button>
+                            <button className="btn btn--ghost btn--sm" disabled={applicationBusyId === a.id} onClick={() => handleApplication(a.id, 'reject')}>
+                              Reject
+                            </button>
+                          </>
+                        ) : myOwnedTeams.some(t => t.id === a.collective_id) ? (
+                          <button className="btn btn--ghost btn--sm" disabled={applicationBusyId === a.id} onClick={() => handleApplication(a.id, 'withdraw')}>
+                            Withdraw
+                          </button>
+                        ) : (
+                          <span className="badge badge--neutral">pending</span>
+                        )}
                       </div>
                     ) : (
                       <span className="badge badge--neutral">{a.status}</span>
@@ -765,6 +795,7 @@ export default function ProjectDetailPage() {
                         </button>
                       )}
                     </div>
+                    <MilestoneFiles projectId={id} milestoneId={m.id} canUpload={isTeamMember && m.status === 'pending'} />
                   </div>
                 ))}
               </div>

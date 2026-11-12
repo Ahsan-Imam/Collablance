@@ -37,6 +37,7 @@ export default function CollectivesPage() {
   const [collectives, setCollectives] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [focus, setFocus] = useState('')
   const [error, setError] = useState('')
   const { role, loading: roleLoading } = useRole()
   // Clients browse every public collective; freelancers see the ones they're in
@@ -58,7 +59,8 @@ export default function CollectivesPage() {
   }, [roleLoading, isClient])
 
   const visible = collectives.filter(c =>
-    !search.trim() || c.name.toLowerCase().includes(search.toLowerCase())
+    (!search.trim() || c.name.toLowerCase().includes(search.toLowerCase()))
+    && (!focus || c.focus_area === focus)
   )
 
   return (
@@ -84,11 +86,16 @@ export default function CollectivesPage() {
           )}
         </div>
 
-        <div className="collectives-page__search animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+        <div className="collectives-page__search animate-fade-in-up" style={{ animationDelay: '100ms', display: 'flex', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
           <input type="text" className="input"
             placeholder="Search teams..."
             value={search} onChange={(e) => setSearch(e.target.value)}
             id="collective-search" />
+          <select className="input" style={{ maxWidth: 200 }} value={focus} onChange={(e) => setFocus(e.target.value)}
+            aria-label="Filter by focus area" id="collective-focus-filter">
+            <option value="">All focus areas</option>
+            {Object.entries(FOCUS_LABELS).map(([val, label]) => <option key={val} value={val}>{label}</option>)}
+          </select>
         </div>
 
         {error && <div className="alert alert--error">{error}</div>}
@@ -103,16 +110,16 @@ export default function CollectivesPage() {
           <div className="collectives-empty animate-fade-in-up" style={{ animationDelay: '200ms' }}>
             <div className="collectives-empty__icon">👥</div>
             <h2 className="collectives-empty__title">
-              {search ? 'No teams match your search' : isClient ? 'No public teams yet' : 'No teams yet'}
+              {search || focus ? 'No teams match your search' : isClient ? 'No public teams yet' : 'No teams yet'}
             </h2>
             <p className="collectives-empty__desc">
-              {search
-                ? 'Try a different name.'
+              {search || focus
+                ? 'Try a different name or focus area.'
                 : isClient
                   ? 'Freelancer teams will show up here as they form. Post a project so they can find you.'
                   : 'Create your first team to start teaming up with other freelancers.'}
             </p>
-            {!search && !isClient && (
+            {!search && !focus && !isClient && (
               <Link href="/teams/create" className="btn btn--primary btn--lg" id="empty-create-collective">
                 Create Your First Team
               </Link>

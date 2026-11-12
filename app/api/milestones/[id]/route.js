@@ -3,12 +3,14 @@ import { getProjectAccess } from '@/lib/projectAccess'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { paymentsEnabled } from '@/lib/payments/razorpay'
 import { releaseMilestone } from '@/lib/payments/escrow'
-import { NextResponse } from 'next/server'
+import { canMoveMilestone } from '@/lib/milestones'
+import { notify, teamMemberIds } from '@/lib/notify'
+import { NextResponse, after } from 'next/server'
 
 const COLUMNS = 'id,project_id,title,description,amount,currency,order_index,status,due_date,submitted_at,approved_at,approved_by,funded_at,created_at,updated_at'
 
 async function loadMilestone(supabase, id) {
-  return supabase.from('milestones').select('id,project_id,status,funded_at').eq('id', id).maybeSingle()
+  return supabase.from('milestones').select('id,project_id,title,status,funded_at').eq('id', id).maybeSingle()
 }
 
 // PATCH /api/milestones/[id] — status transitions, role-restricted.
@@ -24,7 +26,7 @@ export async function PATCH(request, { params }) {
   if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 })
   if (!milestone) return NextResponse.json({ error: 'Milestone not found' }, { status: 404 })
 
-  const { isOwner, isTeamMember, error: accessErr } = await getProjectAccess(supabase, user.id, milestone.project_id)
+  const { project, isOwner, isTeamMember, error: accessErr } = await getProjectAccess(supabase, user.id, milestone.project_id)
   if (accessErr) return NextResponse.json({ error: accessErr }, { status: 500 })
   if (!isOwner && !isTeamMember) return NextResponse.json({ error: 'Not authorized' }, { status: 403 })
 
@@ -48,11 +50,7 @@ export async function PATCH(request, { params }) {
 
   if (status !== undefined) {
     const from = milestone.status
-    const valid =
-      (status === 'submitted' && isTeamMember && from === 'pending') ||
-      (status === 'pending' && isOwner && from === 'submitted') ||            // sent back for changes
-      (status === 'approved' && isOwner && from === 'submitted') ||
-      (status === 'disputed' && (isOwner || isTeamMember) && ['submitted', 'approved'].includes(from))
+    const valid = canMoveMilestone(from, status, { isOwner, isTeamMember })
 
     if (!valid) {
       return NextResponse.json({ error: `Cannot move milestone from "${from}" to "${status}" with your role` }, { status: 400 })
@@ -78,6 +76,17 @@ export async function PATCH(request, { params }) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  if (status) {
+    const path = `/projects/${project.id}`
+    after(async () => {
+      const team = await teamMemberIds(supabase, project.collective_id)
+      if (status === 'submitted') await notify([project.owner_id], `Milestone submitted: ${milestone.title}`, 'The team submitted a milestone for your review. Approve it or send it back.', path)
+      if (status === 'approved') await notify(team, `Milestone approved: ${milestone.title}`, 'The client approved your milestone.', path)
+      if (status === 'pending') await notify(team, `Milestone sent back: ${milestone.title}`, 'The client sent this milestone back for changes.', path)
+      if (status === 'disputed') await notify([project.owner_id, ...team], `Milestone disputed: ${milestone.title}`, 'A dispute was raised on this milestone. Any payment for it stays on hold until the dispute is resolved.', path)
+    })
+  }
 
   // Approval releases the team's held payouts. If Razorpay fails, the approval
   // still stands and the client can retry via POST /api/milestones/[id]/release.

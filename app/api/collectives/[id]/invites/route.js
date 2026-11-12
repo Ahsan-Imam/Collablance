@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { canAcceptProject } from '@/lib/projectAcceptance'
-import { NextResponse } from 'next/server'
+import { notify } from '@/lib/notify'
+import { NextResponse, after } from 'next/server'
 
 // canAcceptProject just checks "is owner/admin of this collective" — the
 // name is project-acceptance-specific but the membership check is generic.
@@ -57,5 +58,6 @@ export async function POST(request, { params }) {
     if (error.code === '23505') return NextResponse.json({ error: 'They already have a pending invite from this team' }, { status: 409 })
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
+  after(() => notify([invitedUserId], 'You have a team invite on CollabLance', 'A team invited you to join. Accept or decline it in your Inbox.', '/inbox'))
   return NextResponse.json({ data }, { status: 201 })
 }

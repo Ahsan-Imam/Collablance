@@ -29,8 +29,9 @@ export default function Footer() {
             <h4 className="footer__heading">Platform</h4>
             <ul className="footer__links">
               <li><Link href="/auth/signup" id="footer-signup">Get Started</Link></li>
-              <li><Link href="/teams" id="footer-teams">Teams</Link></li>
-              <li><Link href="/projects" id="footer-projects">Browse Projects</Link></li>
+              <li><Link href="/hire" id="footer-teams">Browse Teams</Link></li>
+              <li><Link href="/open-projects" id="footer-projects">Open Projects</Link></li>
+              <li><Link href="/pricing" id="footer-pricing">Pricing</Link></li>
               <li><Link href="/#features" id="footer-features">Features</Link></li>
               <li><Link href="/for-freelancers" id="footer-for-freelancers">For Freelancers</Link></li>
             </ul>
