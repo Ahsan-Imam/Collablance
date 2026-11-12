@@ -60,32 +60,11 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ error: CONTRACT_REQUIRED_ERROR }, { status: 400 })
   }
 
-  const { data: updatedApplication, error: acceptErr } = await supabase
-    .from('project_applications')
-    .update({ status: 'accepted', responded_at: new Date().toISOString() })
-    .eq('id', id)
-    .select('id, status, responded_at')
-    .single()
-  if (acceptErr) return NextResponse.json({ error: acceptErr.message }, { status: 500 })
-
-  const { error: projectErr } = await supabase
-    .from('projects')
-    .update({
-      collective_id: application.collective_id,
-      status: 'in_progress',
-      accepted_at: new Date().toISOString(),
-      accepted_by: application.applied_by,
-    })
-    .eq('id', application.project_id)
-  if (projectErr) return NextResponse.json({ error: projectErr.message }, { status: 500 })
-
-  // Every other pending application for this project is now moot
-  await supabase
-    .from('project_applications')
-    .update({ status: 'rejected', responded_at: new Date().toISOString() })
-    .eq('project_id', application.project_id)
-    .eq('status', 'pending')
-    .neq('id', id)
+  // One transaction (accept_application in the database): assigns the project,
+  // accepts this application and rejects the other pending ones — all or nothing.
+  // P0001 is the function refusing because someone else got there first.
+  const { data: updatedApplication, error: acceptErr } = await supabase.rpc('accept_application', { p_application_id: id })
+  if (acceptErr) return NextResponse.json({ error: acceptErr.message }, { status: acceptErr.code === 'P0001' ? 409 : 500 })
 
   after(() => notify([application.applied_by], `Proposal accepted: ${application.projects.title}`, 'The client accepted your team\'s proposal. The project workspace is open.', `/projects/${application.project_id}`))
   return NextResponse.json({ data: updatedApplication })

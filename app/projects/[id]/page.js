@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { canMoveProject } from '@/lib/projectAcceptance'
 import FundMilestoneButton from '@/components/FundMilestoneButton/FundMilestoneButton'
 import MilestoneFiles from '@/components/MilestoneFiles/MilestoneFiles'
 import NdaSection from '@/components/NdaSection/NdaSection'
@@ -690,7 +691,7 @@ export default function ProjectDetailPage() {
                 <select id="project-status" className="input"
                   value={project.status} disabled={updating}
                   onChange={(e) => handleStatusChange(e.target.value)}>
-                  {Object.entries(STATUS_LABELS).map(([val, label]) => (
+                  {Object.entries(STATUS_LABELS).filter(([val]) => val === project.status || canMoveProject(val, !!project.accepted_at)).map(([val, label]) => (
                     <option key={val} value={val}>{label}</option>
                   ))}
                 </select>
@@ -852,7 +853,7 @@ export default function ProjectDetailPage() {
                           </button>
                         </>
                       )}
-                      {['submitted', 'approved'].includes(m.status) && (
+                      {(['submitted', 'approved'].includes(m.status) || (isOwner && m.status === 'pending' && m.funded_at)) && (
                         <button className="btn btn--ghost btn--sm" disabled={milestoneBusyId === m.id} onClick={() => handleMilestoneStatus(m.id, 'disputed')}>
                           Dispute
                         </button>

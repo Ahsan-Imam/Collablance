@@ -72,9 +72,11 @@ export async function POST(request, { params }) {
       status: project.status === 'open' ? 'in_progress' : project.status,
     })
     .eq('id', id)
+    .is('accepted_at', null)
     .select('*, collectives(id, name, avatar_initial, focus_area)')
-    .single()
+    .maybeSingle()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!data) return NextResponse.json({ error: 'Already accepted' }, { status: 409 })
   return NextResponse.json({ data })
 }

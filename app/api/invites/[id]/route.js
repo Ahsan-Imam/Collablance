@@ -25,14 +25,7 @@ export async function PATCH(request, { params }) {
 
   const status = action === 'accept' ? 'accepted' : 'declined'
 
-  const { data, error } = await supabase
-    .from('team_invites')
-    .update({ status, responded_at: new Date().toISOString() })
-    .eq('id', id)
-    .select('id, status, responded_at')
-    .single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
+  // Join before marking the invite accepted, so a failed join can be retried
   if (action === 'accept') {
     const { error: joinErr } = await supabase
       .from('collective_members')
@@ -42,6 +35,14 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ error: joinErr.message }, { status: 500 })
     }
   }
+
+  const { data, error } = await supabase
+    .from('team_invites')
+    .update({ status, responded_at: new Date().toISOString() })
+    .eq('id', id)
+    .select('id, status, responded_at')
+    .single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   return NextResponse.json({ data })
 }
