@@ -146,12 +146,12 @@ export default function ProfilePage() {
               <div className="profile-page__roles">
                 {hasFreelancer && (
                   <span className={`badge ${role === 'freelancer' ? 'badge--primary' : 'badge--neutral'}`}>
-                    🧑‍💻 Freelancer{role === 'freelancer' ? ' · active' : ''}
+                    Freelancer{role === 'freelancer' ? ' · active' : ''}
                   </span>
                 )}
                 {hasClient && (
                   <span className={`badge ${role === 'client' ? 'badge--primary' : 'badge--neutral'}`}>
-                    💼 Client{role === 'client' ? ' · active' : ''}
+                    Client{role === 'client' ? ' · active' : ''}
                   </span>
                 )}
                 {!hasClient && <AddRoleButton role="client" className="btn btn--ghost btn--sm">+ Add client access</AddRoleButton>}
@@ -319,7 +319,7 @@ export default function ProfilePage() {
           <div className="profile-form__footer">
             {saved && (
               <span className="profile-form__saved animate-fade-in">
-                ✓ Profile saved successfully
+                Profile saved
               </span>
             )}
             <button

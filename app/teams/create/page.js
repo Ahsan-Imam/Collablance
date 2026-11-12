@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import '../teams.css'
 import './create.css'
+import Icon from '@/components/Icon/Icon'
 
 const FOCUS_AREAS = [
   { value: 'web_development',    label: 'Web Development' },
@@ -63,7 +64,7 @@ export default function CreateCollectivePage() {
 
         {error && (
           <div className="alert alert--error" id="create-error">
-            <span>⚠️</span><span>{error}</span>
+            <Icon name="alert" /><span>{error}</span>
           </div>
         )}
 

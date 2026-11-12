@@ -1,5 +1,7 @@
 import Link from 'next/link'
-import '../page.css'
+import Icon from '@/components/Icon/Icon'
+import { TEAM_COMMISSION_PERCENT } from '@/lib/payments/money'
+import '../home.css'
 
 export const metadata = {
   title: 'For Freelancers — CollabLance',
@@ -7,202 +9,114 @@ export const metadata = {
     'Form freelancer teams, pitch clients together, and agree payment splits before work starts.',
 }
 
+const FEATURES = [
+  ['users', 'Named teams', 'A team page with your members, completed projects and client reviews, shareable and public.'],
+  ['send', 'Proposals with a price', 'Send one price and one timeline per project. AI can draft the first version for you to edit.'],
+  ['wallet', 'Signed payout splits', 'Your lead proposes who gets what, every member signs, and it locks before work starts.'],
+  ['lock', 'Milestone payments', 'The client funds each milestone first. It is held until they approve, then paid out per your split.'],
+  ['star', 'Reputation', 'Clients rate your team after each project. Your track record shows on your team page.'],
+  ['chat', 'One project chat', 'Talk to the client and your team in one place, next to the milestones and files.'],
+]
+
+const STEPS = [
+  ['Create your profile', 'Add your skills, experience and portfolio link.'],
+  ['Form or join a team', 'Mix designers, developers and writers — whatever your projects need.'],
+  ['Send proposals', 'Pick open projects and reply as a team with a price and a timeline.'],
+  ['Deliver and get paid', 'Upload each milestone, the client approves, and everyone is paid their signed share.'],
+]
+
 export default function ForFreelancersPage() {
   return (
-    <>
-      {/* Hero Section */}
-      <section className="hero" id="hero">
-        <div className="hero__bg">
-          <div className="hero__orb hero__orb--1" />
-          <div className="hero__orb hero__orb--2" />
-          <div className="hero__orb hero__orb--3" />
-          <div className="hero__grid-pattern" />
-        </div>
-        <div className="container hero__content">
-          <h1 className="hero__title animate-fade-in-up">
-            Freelancers are stronger
-            <span className="hero__title-gradient"> together</span>
-          </h1>
-          <p className="hero__subtitle animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-            Form named teams. Pitch clients as a team. 
-            Agree the payment split before work starts.
-            No more solo hustle.
-          </p>
-          <div className="hero__cta animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-            <Link href="/auth/signup" className="btn btn--primary btn--xl" id="hero-cta">
-              Start Your Team
-              <span className="hero__cta-arrow">→</span>
-            </Link>
-            <Link href="/for-freelancers#how-it-works" className="btn btn--secondary btn--xl" id="hero-learn">
-              See How It Works
-            </Link>
-          </div>
-          <p className="hero__client-link animate-fade-in-up" style={{ animationDelay: '250ms' }}>
-            Hiring instead? <Link href="/" id="hero-for-clients">Post a project for teams →</Link>
-          </p>
-          <div className="hero__stats animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-            <div className="hero__stat">
-              <span className="hero__stat-number">1</span>
-              <span className="hero__stat-label">Shared workspace per project</span>
+    <div className="home">
+      <section className="home-band home-band--surface" id="hero">
+        <div className="container home-hero">
+          <div className="home-hero__copy">
+            <p className="home-eyebrow">For freelancers</p>
+            <h1 className="home-hero__title">Freelancers are stronger together.</h1>
+            <p className="home-hero__lead">
+              Form a named team with people you trust. Pitch bigger projects together,
+              and agree the payout split before any work starts.
+            </p>
+            <div className="home-actions">
+              <Link href="/auth/signup" className="home-btn home-btn--primary" id="hero-cta">
+                Start your team <Icon name="arrow" />
+              </Link>
+              <Link href="/open-projects" className="home-btn home-btn--outline" id="hero-open-projects">See open projects</Link>
             </div>
-            <div className="hero__stat-divider" />
-            <div className="hero__stat">
-              <span className="hero__stat-number">₹0</span>
-              <span className="hero__stat-label">To get started</span>
-            </div>
-            <div className="hero__stat-divider" />
-            <div className="hero__stat">
-              <span className="hero__stat-number">100%</span>
-              <span className="hero__stat-label">Team-signed payout splits</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="features" id="features">
-        <div className="container">
-          <div className="section-header">
-            <span className="badge badge--accent">Features</span>
-            <h2 className="section-title">Everything your team needs</h2>
-            <p className="section-subtitle">
-              From forming your team to getting paid — all in one place.
+            <p className="home-hero__note">
+              Free to join and to send proposals. Teams pay {TEAM_COMMISSION_PERCENT}% only on milestones that get paid.
+              {' '}Hiring instead? <Link href="/" id="hero-for-clients">Post a project</Link>
             </p>
           </div>
-          <div className="features__grid stagger-children">
-            <div className="card card--hover feature-card" id="feature-teams">
-              <div className="feature-card__icon">👥</div>
-              <h3 className="feature-card__title">Named Teams</h3>
-              <p className="feature-card__desc">
-                Create a branded team identity. Invite freelancers by skill. 
-                Pitch clients as a credible, organized unit.
-              </p>
+
+          <figure className="home-contract" id="hero-split-example">
+            <div className="home-contract__head">
+              <div>
+                <span className="home-label">Your team</span>
+                <span className="home-contract__project">Pixel &amp; Prose</span>
+              </div>
+              <span className="home-pill home-pill--held">3 members</span>
             </div>
-            <div className="card card--hover feature-card" id="feature-projects">
-              <div className="feature-card__icon">📋</div>
-              <h3 className="feature-card__title">Milestone Tracking</h3>
-              <p className="feature-card__desc">
-                Break projects into clear milestones. Track progress.
-                The client reviews and approves each one as you go.
-              </p>
+            <div className="home-contract__body">
+              <ul className="home-split-rows">
+                <li><span className="home-split-rows__who"><span className="home-dot home-tone-a" />Designer · Team lead</span><span className="home-signed">Signed</span></li>
+                <li><span className="home-split-rows__who"><span className="home-dot home-tone-b" />Developer</span><span className="home-signed">Signed</span></li>
+                <li><span className="home-split-rows__who"><span className="home-dot home-tone-c" />Writer</span><span className="home-signed">Signed</span></li>
+              </ul>
             </div>
-            <div className="card card--hover feature-card" id="feature-payments">
-              <div className="feature-card__icon">💰</div>
-              <h3 className="feature-card__title">Signed Payment Splits</h3>
-              <p className="feature-card__desc">
-                Your team lead proposes the split, every member signs,
-                and it locks before work starts. No arguments later.
-              </p>
+            <div className="home-contract__milestone">
+              <span>Proposal sent · <span className="home-figure">₹52,000</span> · 21 days</span>
+              <span className="home-pill home-pill--ok">Accepted</span>
             </div>
-            <div className="card card--hover feature-card" id="feature-escrow">
-              <div className="feature-card__icon">🔒</div>
-              <h3 className="feature-card__title">Secure Payments (Coming Soon)</h3>
-              <p className="feature-card__desc">
-                Client funds held until each milestone is approved, then
-                paid out per your signed split. Launching soon.
-              </p>
-            </div>
-            <div className="card card--hover feature-card" id="feature-reputation">
-              <div className="feature-card__icon">⭐</div>
-              <h3 className="feature-card__title">Reputation System</h3>
-              <p className="feature-card__desc">
-                Build credibility through project ratings. 
-                Your team&apos;s track record speaks louder than resumes.
-              </p>
-            </div>
-            <div className="card card--hover feature-card" id="feature-chat">
-              <div className="feature-card__icon">💬</div>
-              <h3 className="feature-card__title">Team Chat</h3>
-              <p className="feature-card__desc">
-                Built-in project chat. Keep discussions and decisions
-                in one place. No switching between apps.
-              </p>
-            </div>
-          </div>
+            <figcaption className="home-caption">Example team, for illustration.</figcaption>
+          </figure>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="how-it-works" id="how-it-works">
-        <div className="container">
-          <div className="section-header">
-            <span className="badge badge--primary">How It Works</span>
-            <h2 className="section-title">Four steps to your first project</h2>
-            <p className="section-subtitle">
-              From signup to payday, in less time than you&apos;d think.
-            </p>
+      <section className="container home-section" id="features">
+        <div className="home-heading">
+          <p className="home-eyebrow">What you get</p>
+          <h2 className="home-title">Everything a team needs, from first pitch to payout.</h2>
+        </div>
+        <ul className="home-steps">
+          {FEATURES.map(([icon, title, text]) => (
+            <li key={title} className="home-step">
+              <span className="home-step__number"><Icon name={icon} size={22} /></span>
+              <h3 className="home-step__title">{title}</h3>
+              <p className="home-step__text">{text}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="home-band home-band--surface" id="how-it-works">
+        <div className="container home-section">
+          <div className="home-heading">
+            <p className="home-eyebrow">How it works</p>
+            <h2 className="home-title">Four steps to your first paid project.</h2>
           </div>
-          <div className="steps">
-            <div className="step" id="step-1">
-              <div className="step__number">01</div>
-              <div className="step__content">
-                <h3 className="step__title">Create Your Profile</h3>
-                <p className="step__desc">
-                  Sign up as a freelancer. Add your skills, experience, 
-                  and portfolio. Stand out with skill tags.
-                </p>
-              </div>
-            </div>
-            <div className="step__connector" />
-            <div className="step" id="step-2">
-              <div className="step__number">02</div>
-              <div className="step__content">
-                <h3 className="step__title">Form a Team</h3>
-                <p className="step__desc">
-                  Create a named team or join one. Mix designers, 
-                  developers, writers — whatever the project needs.
-                </p>
-              </div>
-            </div>
-            <div className="step__connector" />
-            <div className="step" id="step-3">
-              <div className="step__number">03</div>
-              <div className="step__content">
-                <h3 className="step__title">Take on Projects</h3>
-                <p className="step__desc">
-                  Browse and bid on projects as a team. Set milestones, 
-                  define splits, and agree on timelines.
-                </p>
-              </div>
-            </div>
-            <div className="step__connector" />
-            <div className="step" id="step-4">
-              <div className="step__number">04</div>
-              <div className="step__content">
-                <h3 className="step__title">Deliver &amp; Get Approved</h3>
-                <p className="step__desc">
-                  Submit each milestone for client approval. Online
-                  payouts per your signed split are coming soon.
-                </p>
-              </div>
-            </div>
-          </div>
+          <ol className="home-steps">
+            {STEPS.map(([title, text], i) => (
+              <li key={title} className="home-step" id={`step-${i + 1}`}>
+                <span className="home-step__number">0{i + 1}</span>
+                <h3 className="home-step__title">{title}</h3>
+                <p className="home-step__text">{text}</p>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="cta-section" id="cta">
-        <div className="container">
-          <div className="cta-card">
-            <div className="cta-card__bg">
-              <div className="cta-card__orb cta-card__orb--1" />
-              <div className="cta-card__orb cta-card__orb--2" />
-            </div>
-            <div className="cta-card__content">
-              <h2 className="cta-card__title">Ready to team up?</h2>
-              <p className="cta-card__desc">
-                Join CollabLance today. It&apos;s free to start, and you only 
-                pay a small platform fee when you get paid.
-              </p>
-              <div className="cta-card__actions">
-                <Link href="/auth/signup" className="btn btn--accent btn--xl" id="cta-signup">
-                  Create Free Account
-                </Link>
-              </div>
-            </div>
+      <section className="home-band home-band--ink" id="cta">
+        <div className="container home-closing">
+          <h2 className="home-closing__title">Ready to team up?</h2>
+          <p className="home-lead home-lead--on-ink">Create a free account, then start a team or accept an invite.</p>
+          <div className="home-actions home-actions--center">
+            <Link href="/auth/signup" className="home-btn home-btn--amber" id="cta-signup">Create free account</Link>
+            <Link href="/hire" className="home-btn home-btn--on-ink" id="cta-browse">See other teams</Link>
           </div>
         </div>
       </section>
-    </>
+    </div>
   )
 }

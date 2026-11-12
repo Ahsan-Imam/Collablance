@@ -199,7 +199,5 @@
 }
 
 .project-card:hover {
-  box-shadow: var(--shadow-lg);
-  border-color: var(--cl-primary-200);
-  transform: translateY(-2px);
+  border-color: var(--cl-primary-600);
 }

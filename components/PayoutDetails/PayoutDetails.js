@@ -59,7 +59,7 @@ export default function PayoutDetails() {
       <h2 style={{ fontSize: '1.125rem', marginBottom: 'var(--space-sm)' }}>Payout details</h2>
       {status.hasPayoutAccount ? (
         <p style={{ color: 'var(--cl-text-secondary)' }}>
-          ✓ Set up. Your share of each approved milestone is paid to your bank account by Razorpay.
+          Set up. Your share of each approved milestone is paid to your bank account by Razorpay.
         </p>
       ) : (
         <form onSubmit={submit} style={{ display: 'grid', gap: 'var(--space-sm)' }}>

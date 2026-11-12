@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import '../teams.css'
 import './team.css'
+import Icon from '@/components/Icon/Icon'
 
 const FOCUS_LABELS = {
   web_development: 'Web Dev', mobile_development: 'Mobile',
@@ -167,7 +168,7 @@ export default function TeamDetailPage() {
         <div className="container">
           <Link href="/teams" className="collective-detail__back">← Back to teams</Link>
           <div className="collectives-empty">
-            <div className="collectives-empty__icon">🔍</div>
+            <div className="collectives-empty__icon"><Icon name="search" size={40} /></div>
             <h2 className="collectives-empty__title">Team not found</h2>
             <p className="collectives-empty__desc">{error || 'It may have been deleted.'}</p>
           </div>
@@ -201,10 +202,10 @@ export default function TeamDetailPage() {
               {collective.focus_area && (
                 <span className="badge badge--neutral">{FOCUS_LABELS[collective.focus_area] || collective.focus_area}</span>
               )}
-              <span className="badge badge--neutral">👥 {members.length} member{members.length !== 1 ? 's' : ''}</span>
-              <span className="badge badge--neutral">✅ {projects.filter(p => p.status === 'completed').length} completed</span>
+              <span className="badge badge--neutral">{members.length} member{members.length !== 1 ? 's' : ''}</span>
+              <span className="badge badge--neutral">{projects.filter(p => p.status === 'completed').length} completed</span>
               {rating.count > 0 && (
-                <span className="badge badge--neutral">⭐ {rating.avg.toFixed(1)} ({rating.count} review{rating.count !== 1 ? 's' : ''})</span>
+                <span className="badge badge--neutral"><Icon name="star" size={13} /> {rating.avg.toFixed(1)} ({rating.count} review{rating.count !== 1 ? 's' : ''})</span>
               )}
               {!collective.is_public && <span className="badge badge--warning">Private</span>}
             </div>
@@ -238,11 +239,11 @@ export default function TeamDetailPage() {
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
             <button className="btn btn--secondary" onClick={handleCopyLink} id="copy-invite-link">
-              {linkCopied ? '✅ Copied!' : '🔗 Copy Invite Link'}
+              <Icon name={linkCopied ? 'check' : 'link'} size={16} />{linkCopied ? 'Copied' : 'Copy invite link'}
             </button>
             {!isMember && (
               <button className="btn btn--primary" onClick={handleJoin} disabled={joining} id="join-team-btn">
-                {joining ? 'Joining…' : '➕ Join Team'}
+                {joining ? 'Joining…' : 'Join team'}
               </button>
             )}
           </div>
@@ -346,11 +347,11 @@ export default function TeamDetailPage() {
                       onClick={() => handleInvite(f.id)}
                       disabled={invitingId === f.id || invitedIds.has(f.id)}
                     >
-                      {invitedIds.has(f.id) ? '✅ Invited' : invitingId === f.id ? 'Inviting…' : '📬 Invite'}
+                      {invitedIds.has(f.id) ? 'Invited' : invitingId === f.id ? 'Inviting…' : 'Invite'}
                     </button>
                   ) : (
                     <button className="btn btn--ghost btn--sm" onClick={handleCopyLink}>
-                      {linkCopied ? '✅' : '🔗 Share Link'}
+                      {linkCopied ? 'Copied' : 'Share link'}
                     </button>
                   )}
                 </div>

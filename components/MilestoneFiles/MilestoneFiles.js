@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import Icon from '@/components/Icon/Icon'
 
 // Deliverable files for one milestone, in the private 'deliverables' bucket at
 // <projectId>/<milestoneId>/. Storage policies decide who can read and upload;
@@ -47,7 +48,7 @@ export default function MilestoneFiles({ projectId, milestoneId, canUpload }) {
           {files.map(f => (
             <li key={f.name}>
               <button type="button" className="btn btn--ghost btn--sm" onClick={() => handleOpen(f.name)}>
-                📎 {f.name.replace(/^\d+-/, '')}
+                <Icon name="clip" size={14} /> {f.name.replace(/^\d+-/, '')}
               </button>
             </li>
           ))}

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRole } from '@/lib/hooks/useRole'
 import ProjectCard from '@/components/ProjectCard/ProjectCard'
 import './projects.css'
+import Icon from '@/components/Icon/Icon'
 
 const FILTER_LABELS = { all: 'All', open: 'Open', in_progress: 'In Progress', completed: 'Completed' }
 
@@ -84,7 +85,7 @@ export default function ProjectsPage() {
           </div>
         ) : projects.length === 0 ? (
           <div className="projects-empty animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-            <div className="projects-empty__icon">📋</div>
+            <div className="projects-empty__icon"><Icon name="file" size={40} /></div>
             <h2 className="projects-empty__title">No projects found</h2>
             <p className="projects-empty__desc">
               {search || skill || minBudget || filter !== 'all'

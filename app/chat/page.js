@@ -5,6 +5,7 @@ import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import { createClient } from '@/lib/supabase/client'
 import './chat.css'
+import Icon from '@/components/Icon/Icon'
 
 function relativeTime(ts) {
   const diff = Math.floor((Date.now() - new Date(ts)) / 1000)
@@ -18,14 +19,14 @@ function relativeTime(ts) {
 function ToolPill({ part }) {
   const name = part.type.startsWith('tool-') ? part.type.slice(5) : part.toolName
   const labels = {
-    searchTeamContext: '🔍 Searching team context',
-    postTeamContext: '📝 Posting to team context',
-    listProjects: '📁 Looking up projects',
+    searchTeamContext: 'Searching team context',
+    postTeamContext: 'Posting to team context',
+    listProjects: 'Looking up projects',
   }
-  const label = labels[name] || `🔧 ${name}`
+  const label = labels[name] || name
 
   if (part.state === 'output-error') {
-    return <div className="ai-tool-pill ai-tool-pill--error">⚠️ {label} failed: {part.errorText}</div>
+    return <div className="ai-tool-pill ai-tool-pill--error">{label} failed: {part.errorText}</div>
   }
   if (part.state === 'output-available') {
     // Tool results arrive as JSON text
@@ -64,7 +65,7 @@ function AIAssistantPanel() {
   return (
     <>
       <div className="chat-thread__header">
-        <div className="avatar avatar--sm">🤖</div>
+        <div className="avatar avatar--sm"><Icon name="bot" size={16} label="Assistant" /></div>
         <div>
           <div style={{ fontWeight: 700 }}>AI Assistant</div>
           <div style={{ fontSize: '0.75rem', color: 'var(--cl-text-tertiary)' }}>
@@ -76,7 +77,7 @@ function AIAssistantPanel() {
       <div className="chat-thread__messages" ref={scrollRef}>
         {messages.length === 0 && (
           <div className="chat-main__empty" style={{ flex: 'none' }}>
-            <div className="chat-main__empty-icon">✨</div>
+            <div className="chat-main__empty-icon"><Icon name="sparkle" size={40} /></div>
             <h2 className="chat-main__empty-title">Ask the AI Assistant</h2>
             <p className="chat-main__empty-desc">
               &ldquo;What is the team building right now?&rdquo; · &ldquo;Post a blocker: the payments webhook is flaky&rdquo;
@@ -112,7 +113,7 @@ function AIAssistantPanel() {
 
         {error && (
           <div className="alert alert--error" style={{ margin: '0 var(--space-xl)' }}>
-            ⚠️ Something went wrong. Please try again.
+            Something went wrong. Please try again.
           </div>
         )}
       </div>
@@ -194,7 +195,7 @@ function ProjectChatPanel({ project, currentUserId }) {
   return (
     <>
       <div className="chat-thread__header">
-        <div className="avatar avatar--sm">📋</div>
+        <div className="avatar avatar--sm"><Icon name="file" size={16} label="Project" /></div>
         <div>
           <div style={{ fontWeight: 700 }}>{project.title}</div>
           <div style={{ fontSize: '0.75rem', color: 'var(--cl-text-tertiary)' }}>
@@ -208,7 +209,7 @@ function ProjectChatPanel({ project, currentUserId }) {
           <div className="skeleton" style={{ height: 120, borderRadius: 12 }} />
         ) : messages.length === 0 ? (
           <div className="chat-main__empty" style={{ flex: 'none' }}>
-            <div className="chat-main__empty-icon">💬</div>
+            <div className="chat-main__empty-icon"><Icon name="chat" size={40} /></div>
             <h2 className="chat-main__empty-title">No messages yet</h2>
             <p className="chat-main__empty-desc">Say hello to get the conversation started.</p>
           </div>
@@ -229,7 +230,7 @@ function ProjectChatPanel({ project, currentUserId }) {
         )}
 
         {error && (
-          <div className="alert alert--error" style={{ margin: '0 var(--space-xl)' }}>⚠️ {error}</div>
+          <div className="alert alert--error" style={{ margin: '0 var(--space-xl)' }}>{error}</div>
         )}
       </div>
 
@@ -278,7 +279,7 @@ export default function ChatPage() {
           onClick={() => setActive('ai')}
           id="chat-nav-ai"
         >
-          <div className="avatar avatar--sm">🤖</div>
+          <div className="avatar avatar--sm"><Icon name="bot" size={16} label="Assistant" /></div>
           <div className="chat-sidebar__item-text">
             <span className="chat-sidebar__item-name">AI Assistant</span>
             <span className="chat-sidebar__item-hint">Always available</span>
@@ -300,7 +301,7 @@ export default function ChatPage() {
               onClick={() => setActive(p.id)}
               id={`chat-nav-project-${p.id}`}
             >
-              <div className="avatar avatar--sm">📋</div>
+              <div className="avatar avatar--sm"><Icon name="file" size={16} label="Project" /></div>
               <div className="chat-sidebar__item-text">
                 <span className="chat-sidebar__item-name">{p.title}</span>
                 <span className="chat-sidebar__item-hint">{p.collectives?.name || 'Independent'}</span>
@@ -317,7 +318,7 @@ export default function ChatPage() {
           <ProjectChatPanel key={activeProject.id} project={activeProject} currentUserId={currentUserId} />
         ) : (
           <div className="chat-main__empty">
-            <div className="chat-main__empty-icon">💬</div>
+            <div className="chat-main__empty-icon"><Icon name="chat" size={40} /></div>
             <h2 className="chat-main__empty-title">Select a project chat</h2>
             <p className="chat-main__empty-desc">
               Your team conversations will appear here. Join a project to start chatting

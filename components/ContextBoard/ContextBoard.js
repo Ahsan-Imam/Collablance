@@ -3,16 +3,17 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import './ContextBoard.css'
+import Icon from '@/components/Icon/Icon'
 
 // ── Section metadata ────────────────────────────────────────────────────────
 const SECTIONS = [
-  { id: 'all',         label: 'All',           emoji: '🌐', color: 'var(--cl-primary-500)' },
-  { id: 'building',    label: 'Building',       emoji: '🔨', color: '#7c3aed' },
-  { id: 'perspective', label: 'Perspective',    emoji: '🧭', color: '#0891b2' },
-  { id: 'goals',       label: 'Goals',          emoji: '🎯', color: '#059669' },
-  { id: 'decisions',   label: 'Decisions',      emoji: '⚖️',  color: '#d97706' },
-  { id: 'blockers',    label: 'Blockers',       emoji: '🚧', color: '#dc2626' },
-  { id: 'context',     label: 'Notes',          emoji: '📝', color: '#475569' },
+  { id: 'all',         label: 'All',           icon: 'globe', color: 'var(--cl-primary-500)' },
+  { id: 'building',    label: 'Building',       icon: 'code', color: '#7c3aed' },
+  { id: 'perspective', label: 'Perspective',    icon: 'compass', color: '#0891b2' },
+  { id: 'goals',       label: 'Goals',          icon: 'target', color: '#059669' },
+  { id: 'decisions',   label: 'Decisions',      icon: 'scale', color: '#d97706' },
+  { id: 'blockers',    label: 'Blockers',       icon: 'flag', color: '#dc2626' },
+  { id: 'context',     label: 'Notes',          icon: 'pen', color: '#475569' },
 ]
 
 const SECTION_MAP = Object.fromEntries(SECTIONS.map(s => [s.id, s]))
@@ -40,7 +41,7 @@ function ContextCard({ card, currentUserId, onDelete, onPin }) {
   return (
     <div className={`ctx-card ${card.is_pinned ? 'ctx-card--pinned' : ''} animate-fade-in-up`}
       style={{ '--sec-color': sec.color }}>
-      {card.is_pinned && <div className="ctx-card__pin">📌 Pinned</div>}
+      {card.is_pinned && <div className="ctx-card__pin"><Icon name="pin" size={13} /> Pinned</div>}
       <div className="ctx-card__header">
         <div className="ctx-card__author">
           <div className="avatar avatar--sm ctx-card__avatar">
@@ -52,7 +53,7 @@ function ContextCard({ card, currentUserId, onDelete, onPin }) {
           </div>
         </div>
         <div className="ctx-card__section-badge" style={{ background: `${sec.color}18`, color: sec.color }}>
-          {sec.emoji} {sec.label}
+          <Icon name={sec.icon} size={13} /> {sec.label}
         </div>
       </div>
       <h3 className="ctx-card__title">{card.title}</h3>
@@ -71,7 +72,7 @@ function ContextCard({ card, currentUserId, onDelete, onPin }) {
             onClick={() => onPin(card.id, !card.is_pinned)}
             id={`pin-${card.id}`}
           >
-            {card.is_pinned ? '📌 Unpin' : 'Pin'}
+            {card.is_pinned ? 'Unpin' : 'Pin'}
           </button>
           <button
             className="btn btn--danger btn--sm"
@@ -131,10 +132,10 @@ function AddCardForm({ onAdd, onCancel, collectiveId, projectId }) {
     <div className="ctx-form animate-scale-in" id="add-context-form">
       <div className="ctx-form__header">
         <h3 className="ctx-form__title">Share Your Context</h3>
-        <button className="btn btn--ghost btn--sm" onClick={onCancel} id="cancel-context">✕</button>
+        <button className="btn btn--ghost btn--sm" onClick={onCancel} id="cancel-context" aria-label="Close"><Icon name="x" size={16} /></button>
       </div>
 
-      {error && <div className="alert alert--error" style={{ marginBottom: '1rem' }}>⚠️ {error}</div>}
+      {error && <div className="alert alert--error" style={{ marginBottom: '1rem' }}>{error}</div>}
 
       <form onSubmit={handleSubmit}>
         <div className="input-group" style={{ marginBottom: '1rem' }}>
@@ -149,7 +150,7 @@ function AddCardForm({ onAdd, onCancel, collectiveId, projectId }) {
                 onClick={() => setSection(s.id)}
                 id={`section-${s.id}`}
               >
-                {s.emoji} {s.label}
+                <Icon name={s.icon} size={14} /> {s.label}
               </button>
             ))}
           </div>
@@ -198,7 +199,7 @@ function AddCardForm({ onAdd, onCancel, collectiveId, projectId }) {
             disabled={loading}
             id="submit-context"
           >
-            {loading ? 'Sharing...' : '🚀 Share Context'}
+            {loading ? 'Sharing…' : 'Share context'}
           </button>
           <button
             type="button"
@@ -333,13 +334,11 @@ export default function ContextBoard({ collectiveId, projectId, teamName, projec
   return (
     <div className="ctx-page">
       <div className="ctx-page__hero">
-        <div className="ctx-page__orb ctx-page__orb--1" />
-        <div className="ctx-page__orb ctx-page__orb--2" />
         <div className="container">
           <div className="ctx-page__hero-inner animate-fade-in-up">
             <div>
               <div className="ctx-page__badge">
-                <span className="badge badge--primary">🧠 {teamName}</span>
+                <span className="badge badge--primary">{teamName}</span>
               </div>
               <h1 className="ctx-page__title">{projectTitle} — Context</h1>
               <p className="ctx-page__subtitle">
@@ -352,7 +351,7 @@ export default function ContextBoard({ collectiveId, projectId, teamName, projec
               onClick={() => setShowForm(!showForm)}
               id="add-context-btn"
             >
-              {showForm ? '✕ Cancel' : '+ Share Context'}
+              {showForm ? 'Cancel' : '+ Share context'}
             </button>
           </div>
 
@@ -394,14 +393,14 @@ export default function ContextBoard({ collectiveId, projectId, teamName, projec
                 style={{ '--sec-color': s.color }}
                 id={`filter-tab-${s.id}`}
               >
-                {s.emoji} {s.label}
+                <Icon name={s.icon} size={14} /> {s.label}
               </button>
             ))}
           </div>
           <div className="ctx-search-wrap">
             <input
               className="input ctx-search"
-              placeholder="✨ Semantic search..."
+              placeholder="Search by meaning…"
               value={search}
               onChange={e => {
                 setSearch(e.target.value)
@@ -412,13 +411,13 @@ export default function ContextBoard({ collectiveId, projectId, teamName, projec
             {searching && <span className="ctx-search-spin">⟳</span>}
             {searchMode && !searching && (
               <span className={`ctx-search-badge ctx-search-badge--${searchMode}`}>
-                {searchMode === 'vector' ? '🧠 vector' : '🔤 text'}
+                {searchMode === 'vector' ? 'by meaning' : 'by keyword'}
               </span>
             )}
           </div>
         </div>
 
-        {error && <div className="alert alert--error" style={{ marginBottom: '1rem' }}>⚠️ {error}</div>}
+        {error && <div className="alert alert--error" style={{ marginBottom: '1rem' }}>{error}</div>}
 
         {loading ? (
           <div className="ctx-grid">
@@ -428,7 +427,7 @@ export default function ContextBoard({ collectiveId, projectId, teamName, projec
           </div>
         ) : visible.length === 0 ? (
           <div className="ctx-empty animate-scale-in">
-            <div className="ctx-empty__icon">🧠</div>
+            <div className="ctx-empty__icon"><Icon name="layers" size={40} /></div>
             <h2 className="ctx-empty__title">
               {cards.length === 0 ? 'No context shared yet' : 'No results found'}
             </h2>
@@ -458,7 +457,7 @@ export default function ContextBoard({ collectiveId, projectId, teamName, projec
         )}
 
         <div className="ctx-mcp-banner animate-fade-in-up">
-          <div className="ctx-mcp-banner__icon">🤖</div>
+          <div className="ctx-mcp-banner__icon"><Icon name="bot" size={28} /></div>
           <div className="ctx-mcp-banner__content">
             <h4 className="ctx-mcp-banner__title">AI Tools can read this board</h4>
             <p className="ctx-mcp-banner__desc">

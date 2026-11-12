@@ -1,7 +1,8 @@
 .footer {
-  background: var(--cl-gray-900);
-  color: var(--cl-gray-300);
-  padding: var(--space-4xl) 0 var(--space-xl);
+  background: var(--cl-surface);
+  color: var(--cl-text-secondary);
+  border-top: 1px solid var(--cl-border);
+  padding: var(--space-3xl) 0 var(--space-xl);
   margin-top: var(--space-4xl);
 }
 
@@ -9,7 +10,7 @@
   display: grid;
   grid-template-columns: 1.5fr 1fr 1fr 1fr;
   gap: var(--space-3xl);
-  margin-bottom: var(--space-3xl);
+  margin-bottom: var(--space-2xl);
 }
 
 .footer__brand {
@@ -21,36 +22,24 @@
 .footer__logo {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: white;
+  gap: 10px;
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--cl-text);
 }
 
-.footer__logo-icon {
-  font-size: 1.5rem;
-  background: linear-gradient(135deg, var(--cl-primary-400), var(--cl-accent-400));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.footer__logo-accent {
-  background: linear-gradient(135deg, var(--cl-primary-400), var(--cl-accent-400));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+.footer__logo-icon { color: var(--cl-primary-600); }
 
 .footer__tagline {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: var(--cl-gray-400);
+  color: var(--cl-text-secondary);
 }
 
 .footer__tagline--small {
   font-size: 0.8125rem;
-  color: var(--cl-gray-500);
+  color: var(--cl-text-secondary);
 }
 
 .footer__section {
@@ -64,7 +53,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--cl-gray-200);
+  color: var(--cl-text);
 }
 
 .footer__links {
@@ -76,16 +65,16 @@
 .footer__links a,
 .footer__text {
   font-size: 0.875rem;
-  color: var(--cl-gray-400);
+  color: var(--cl-text-secondary);
   transition: color var(--transition-fast);
 }
 
 .footer__links a:hover {
-  color: white;
+  color: var(--cl-text);
 }
 
 .footer__bottom {
-  border-top: 1px solid var(--cl-gray-800);
+  border-top: 1px solid var(--cl-border);
   padding-top: var(--space-xl);
   display: flex;
   align-items: center;
@@ -96,12 +85,12 @@
 
 .footer__copyright {
   font-size: 0.8125rem;
-  color: var(--cl-gray-500);
+  color: var(--cl-text-secondary);
 }
 
 .footer__legal-note {
   font-size: 0.75rem;
-  color: var(--cl-gray-600);
+  color: var(--cl-text-secondary);
 }
 
 @media (max-width: 768px) {

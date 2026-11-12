@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRole } from '@/lib/hooks/useRole'
 import './teams.css'
+import Icon from '@/components/Icon/Icon'
 
 const FOCUS_LABELS = {
   web_development: 'Web Dev', mobile_development: 'Mobile',
@@ -25,7 +26,7 @@ function CollectiveCard({ collective }) {
           {collective.focus_area && (
             <span className="badge badge--neutral">{FOCUS_LABELS[collective.focus_area] || collective.focus_area}</span>
           )}
-          <span className="collective-card__members">👥 {memberCount} member{memberCount !== 1 ? 's' : ''}</span>
+          <span className="collective-card__members"><Icon name="users" size={15} /> {memberCount} member{memberCount !== 1 ? 's' : ''}</span>
         </div>
       </div>
       <span className="collective-card__arrow">→</span>
@@ -108,7 +109,7 @@ export default function CollectivesPage() {
           </div>
         ) : visible.length === 0 ? (
           <div className="collectives-empty animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-            <div className="collectives-empty__icon">👥</div>
+            <div className="collectives-empty__icon"><Icon name="users" size={40} /></div>
             <h2 className="collectives-empty__title">
               {search || focus ? 'No teams match your search' : isClient ? 'No public teams yet' : 'No teams yet'}
             </h2>

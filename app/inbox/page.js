@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Icon from '@/components/Icon/Icon'
 
 const FOCUS_LABELS = {
   web_development: 'Web Dev', mobile_development: 'Mobile',
@@ -58,18 +59,18 @@ export default function InboxPage() {
 
   return (
     <div className="container" style={{ padding: 'var(--space-xl) 0', maxWidth: 720 }}>
-      <h1 style={{ marginBottom: 'var(--space-xs)' }}>📬 Inbox</h1>
+      <h1 style={{ marginBottom: 'var(--space-xs)' }}>Inbox</h1>
       <p style={{ color: 'var(--cl-text-secondary)', marginBottom: 'var(--space-xl)' }}>
         Team invites sent to you.
       </p>
 
-      {error && <div className="alert alert--error" style={{ marginBottom: 'var(--space-md)' }}>⚠️ {error}</div>}
+      {error && <div className="alert alert--error" style={{ marginBottom: 'var(--space-md)' }}>{error}</div>}
 
       {loading ? (
         <div className="skeleton" style={{ height: 120, borderRadius: 16 }} />
       ) : invites.length === 0 ? (
         <div className="card" style={{ padding: 'var(--space-xl)', textAlign: 'center' }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: 'var(--space-sm)' }}>📭</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--space-sm)', color: 'var(--cl-text-tertiary)' }}><Icon name="inbox" size={40} /></div>
           <p style={{ color: 'var(--cl-text-secondary)' }}>No invites yet.</p>
         </div>
       ) : (

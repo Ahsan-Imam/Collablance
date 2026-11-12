@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import ContextBoard from '@/components/ContextBoard/ContextBoard'
+import Icon from '@/components/Icon/Icon'
 
 export default function ProjectWorkspacePage() {
   const { id } = useParams()
@@ -67,7 +68,7 @@ export default function ProjectWorkspacePage() {
           ← Back to project
         </Link>
         <div className="card" style={{ padding: 'var(--space-xl)', textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: 'var(--space-sm)' }}>🔒</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--space-sm)', color: 'var(--cl-text-tertiary)' }}><Icon name="lock" size={40} /></div>
           <h1 style={{ marginBottom: 'var(--space-sm)' }}>Workspace not open yet</h1>
           {error && <div className="alert alert--error" style={{ marginBottom: '1rem' }}>{error}</div>}
           {canAccept ? (
@@ -77,7 +78,7 @@ export default function ProjectWorkspacePage() {
                 Accept it to open the project workspace and start sharing context.
               </p>
               <button className="btn btn--primary btn--lg" onClick={handleAccept} disabled={accepting} id="accept-project-btn">
-                {accepting ? 'Accepting…' : `✅ Accept for ${project.collectives?.name || 'your team'}`}
+                {accepting ? 'Accepting…' : `Accept for ${project.collectives?.name || 'your team'}`}
               </button>
               <p style={{ color: 'var(--cl-text-tertiary)', fontSize: '0.8125rem', marginTop: 'var(--space-md)' }}>
                 Every team member needs to sign the payment split contract first — propose and sign it from the{' '}

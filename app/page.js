@@ -1,12 +1,7 @@
 import Link from 'next/link'
-import { Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 import { CLIENT_FEE_PERCENT, TEAM_COMMISSION_PERCENT } from '@/lib/payments/money'
 import { FOCUS, focusSlug } from '@/lib/site'
 import './home.css'
-
-// Both are variable fonts: no weight list, one file each covers every weight used
-const display = Space_Grotesk({ subsets: ['latin'], variable: '--font-display', display: 'swap' })
-const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-figures', display: 'swap' })
 
 export const metadata = {
   title: 'Hire a Freelancer Team — CollabLance',
@@ -54,7 +49,7 @@ export default function HomePage() {
   const commission = (EXAMPLE * TEAM_COMMISSION_PERCENT) / 100
 
   return (
-    <div className={`home ${display.variable} ${mono.variable}`}>
+    <div className="home">
       {/* Hero */}
       <section className="home-band home-band--surface" id="hero">
         <div className="container home-hero">

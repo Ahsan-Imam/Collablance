@@ -36,7 +36,6 @@ export default function CookieConsent() {
   return (
     <div className="cookie-banner animate-fade-in-up" role="dialog" aria-label="Cookie consent" id="cookie-consent-banner">
       <div className="cookie-banner__content">
-        <div className="cookie-banner__icon">🍪</div>
         <div className="cookie-banner__text">
           <p className="cookie-banner__title">We value your privacy</p>
           <p className="cookie-banner__desc">
