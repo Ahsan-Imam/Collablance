@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node lib/payments/money.test.mjs && node lib/payments/signature.test.mjs && node lib/milestones.test.mjs && node lib/splits.test.mjs"
+    "test": "node lib/payments/money.test.mjs && node lib/payments/signature.test.mjs && node lib/milestones.test.mjs && node lib/projectAcceptance.test.mjs &&node lib/splits.test.mjs"
   },
   "dependencies": {
     "@ai-sdk/langchain": "^3.0.170",

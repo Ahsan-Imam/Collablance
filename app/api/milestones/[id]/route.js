@@ -50,7 +50,7 @@ export async function PATCH(request, { params }) {
 
   if (status !== undefined) {
     const from = milestone.status
-    const valid = canMoveMilestone(from, status, { isOwner, isTeamMember })
+    const valid = canMoveMilestone(from, status, { isOwner, isTeamMember, funded: !!milestone.funded_at })
 
     if (!valid) {
       return NextResponse.json({ error: `Cannot move milestone from "${from}" to "${status}" with your role` }, { status: 400 })

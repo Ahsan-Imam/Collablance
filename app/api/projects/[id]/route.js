@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { canMoveProject } from '@/lib/projectAcceptance'
 import { NextResponse } from 'next/server'
 
 const STATUSES = ['open', 'in_progress', 'completed', 'cancelled']
@@ -43,6 +44,20 @@ export async function PATCH(request, { params }) {
   if (body.status !== undefined) {
     if (!STATUSES.includes(body.status)) {
       return NextResponse.json({ error: `status must be one of: ${STATUSES.join(', ')}` }, { status: 400 })
+    }
+    const { data: current, error: curErr } = await supabase
+      .from('projects')
+      .select('status, accepted_at')
+      .eq('id', id)
+      .eq('owner_id', user.id)
+      .maybeSingle()
+    if (curErr) return NextResponse.json({ error: curErr.message }, { status: 500 })
+    if (!current) return NextResponse.json({ error: 'Not found or not authorized' }, { status: 404 })
+    if (body.status !== current.status && !canMoveProject(body.status, !!current.accepted_at)) {
+      const why = current.accepted_at
+        ? 'A project a team has accepted can only be in progress, completed or cancelled'
+        : 'A project becomes in progress when a team accepts it — until then it can only be open or cancelled'
+      return NextResponse.json({ error: why }, { status: 400 })
     }
     updates.status = body.status
   }
