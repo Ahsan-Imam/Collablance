@@ -12,9 +12,23 @@ export default function PayoutDetails() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    fetch('/api/payout-account').then(r => r.json()).then(json => setStatus(json.data || null)).catch(() => {})
+    fetch('/api/payout-account')
+      .then(async (r) => {
+        const json = await r.json().catch(() => ({}))
+        if (!r.ok || !json.data) throw new Error(json.error || `HTTP ${r.status}`)
+        setStatus(json.data)
+      })
+      .catch((err) => setStatus({ loadError: err.message }))
   }, [])
 
+  if (status?.loadError) {
+    return (
+      <div className="card" style={{ padding: 'var(--space-lg)', marginTop: 'var(--space-xl)' }}>
+        <h2 style={{ fontSize: '1.125rem', marginBottom: 'var(--space-sm)' }}>Payout details</h2>
+        <p style={{ color: 'var(--cl-danger, #dc2626)', fontSize: '0.875rem' }}>Couldn&apos;t load payout settings: {status.loadError}</p>
+      </div>
+    )
+  }
   if (!status?.paymentsEnabled) return null
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }))
