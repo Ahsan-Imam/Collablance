@@ -17,7 +17,7 @@ export async function GET(request) {
     if (!error) {
       if (wantsClient) {
         // Adds client access (new or existing account) and switches to client mode —
-        // one account can be both (see dual_role_migration.sql)
+        // one account can be both (see supabase/migrations/20261112000000_dual_role.sql)
         const { error: roleErr } = await supabase.rpc('add_role', { new_role: 'client' })
         if (roleErr) {
           console.error('[auth/callback] add_role failed:', roleErr.message)

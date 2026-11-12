@@ -69,15 +69,16 @@ export default function TermsPage() {
             The terms below apply from the date payments launch, with notice as set out in Section 12.
           </p>
           <div className="legal-highlight">
-            CollabLance charges a platform fee of 3-5% on each milestone payment. 
-            This fee is non-refundable once a milestone is approved by the client.
+            Clients pay a 5% service fee on top of each milestone. Teams pay an 8% commission,
+            deducted from each milestone before it is split among members. Both are
+            non-refundable once a milestone is approved by the client.
           </div>
           <ul>
-            <li><strong>Escrow:</strong> Client funds are held in escrow via Razorpay until milestone approval</li>
-            <li><strong>Release:</strong> Funds are released to the team upon client approval of each milestone</li>
-            <li><strong>Splits:</strong> Payment splits are defined at project setup and locked once agreed by all parties</li>
-            <li><strong>Platform fee:</strong> 3-5% of each milestone payment, deducted before distribution</li>
-            <li><strong>Processing:</strong> Payments are processed via Razorpay within 5-7 business days of milestone approval</li>
+            <li><strong>Funding:</strong> The client funds each milestone before the team starts it. Funds are held via Razorpay until the client approves that milestone</li>
+            <li><strong>Release:</strong> On approval, the milestone amount minus the 8% commission is paid to the team members per their signed split</li>
+            <li><strong>Splits:</strong> Payment splits are defined at project setup and locked once agreed by all team members</li>
+            <li><strong>Example:</strong> For a ₹10,000 milestone, the client pays ₹10,500 and the team receives ₹9,200 in total</li>
+            <li><strong>Payouts:</strong> Each team member must set up a payout account with Razorpay. Payouts are settled by Razorpay to their bank account on Razorpay&apos;s settlement schedule after approval</li>
           </ul>
           <p>
             For disputes regarding payments, see our <a href="/legal/disputes">Dispute Resolution Policy</a>.

@@ -19,8 +19,8 @@ export default function RefundPage() {
         <div className="legal-section">
           <h2>1. Platform Fee</h2>
           <div className="legal-highlight">
-            The CollabLance platform fee (3-5%) is non-refundable once a milestone 
-            has been approved by the client. This fee covers payment processing, 
+            The CollabLance fees (5% client service fee, 8% team commission) are
+            non-refundable once a milestone has been approved by the client. This fee covers payment processing, 
             escrow management, and platform maintenance.
           </div>
         </div>

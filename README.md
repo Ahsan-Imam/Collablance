@@ -21,15 +21,18 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ### Database setup
 
-Run the SQL files in `lib/db/` against your Supabase project, in this order, via the Supabase SQL editor:
+Migrations live in `supabase/migrations/` and are applied with the [Supabase CLI](https://supabase.com/docs/guides/cli) (`brew install supabase/tap/supabase`). Don't paste SQL into the dashboard editor — the CLI keeps a record of what's applied, so the database can't drift behind the code.
 
-1. `setup.sql`, `app_schema.sql` — core tables (profiles, collectives, projects)
-2. `team_context_migration.sql`, `vector_migration.sql`, `context_scoped_search_migration.sql` — Team Context board + semantic search
-3. `dual_role_migration.sql`, `client_role_migration.sql`, `google_client_signup_migration.sql` — client/freelancer dual-role accounts
-4. `project_acceptance_migration.sql` — team accepts a project to open its workspace
-5. `milestones_migration.sql`, `reviews_migration.sql`, `project_messages_migration.sql` — milestones, ratings, team chat
-6. `team_invites_migration.sql`, `project_applications_migration.sql`, `team_leader_migration.sql`, `contracts_migration.sql` — invites, team applications, team leader role, payment split contracts
-7. `security_hardening_migration.sql` — **always last**: makes the database enforce who can change what (the browser can call Supabase directly, so API checks alone aren't enough)
+```bash
+supabase login
+supabase link --project-ref <your-project-ref>
+supabase db push --remote --dry-run   # see what would run
+supabase db push --remote             # apply it
+```
+
+To change the schema: `supabase migration new <name>`, write the SQL in the new file, then `db push --remote`. Never edit a migration that's already been pushed — add a new one.
+
+Every table needs RLS rules that hold even if someone calls Supabase directly from the browser (the anon key is public). `supabase/tests/security_hardening_test.sql` attacks the rules on a throwaway local Postgres — run it after changing access rules.
 
 ### AI Assistant (`/chat`)
 
@@ -45,7 +48,8 @@ Routed through [Vercel AI Gateway](https://vercel.com/docs/ai-gateway). For loca
 
 - `app/` — routes (App Router), one folder per page/segment; `app/api/` for API routes
 - `components/` — shared UI components
-- `lib/` — Supabase clients, shared server-side helpers, SQL migrations (`lib/db/`)
+- `lib/` — Supabase clients, shared server-side helpers
+- `supabase/migrations/` — database schema, applied in filename order by `supabase db push`
 - `proxy.js` — auth middleware (protects logged-in-only routes)
 - `guardrail.md` — the project's own scope/phase plan and build rules
 

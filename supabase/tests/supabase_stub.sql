@@ -2,11 +2,10 @@
 -- testing against a throwaway local Postgres. See security_hardening_test.sql.
 create role authenticated; create role anon;
 create schema auth;
-create table auth.users (id uuid primary key, raw_user_meta_data jsonb);
+create table auth.users (id uuid primary key, raw_user_meta_data jsonb, created_at timestamptz default now());
 create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
 grant usage on schema auth to authenticated;
 create publication supabase_realtime;
-create function update_updated_at_column() returns trigger language plpgsql as $$ begin new.updated_at = now(); return new; end $$;
 
 -- run after the migrations:
 -- grant usage on schema public to authenticated; grant all on all tables in schema public to authenticated;

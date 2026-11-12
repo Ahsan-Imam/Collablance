@@ -1,7 +1,9 @@
--- Attack tests for security_hardening_migration.sql. NEVER run on the real database.
--- Local throwaway DB: run tests/supabase_stub.sql, app_schema.sql, project_acceptance, milestones, reviews,
--- team_invites, project_applications, team_leader, contracts, the stub's grants/users, then
--- security_hardening_migration.sql, then this file with psql. Each step echoes what to expect.
+-- Attack tests for the access rules (RLS + triggers). NEVER run on the real database.
+-- Needs a throwaway local Postgres 17 + pgvector (brew install postgresql@17 pgvector):
+--   1. run supabase_stub.sql (fake auth schema/roles)
+--   2. run every supabase/migrations/*.sql in filename order
+--   3. run the grants + test users from the bottom of supabase_stub.sql
+--   4. psql -f this file — each step echoes what to expect
 \set C '''11111111-1111-1111-1111-111111111111'''
 \set L '''22222222-2222-2222-2222-222222222222'''
 \set M '''33333333-3333-3333-3333-333333333333'''
@@ -82,3 +84,55 @@ select set_config('request.jwt.claim.sub', :L, false) \g /dev/null
 update project_applications set status = 'accepted' where id = 'eeeeeeee-0000-0000-0000-000000000001';
 \echo '== 7b. lead withdraws (expect UPDATE 1)'
 update project_applications set status = 'withdrawn' where id = 'eeeeeeee-0000-0000-0000-000000000001';
+
+-- Client role: posting needs client access, granted only through add_role()
+reset role;
+set role authenticated;
+select set_config('request.jwt.claim.sub', '44444444-4444-4444-4444-444444444444', false) \g /dev/null
+\echo '== R1. freelancer posts project (expect ERROR - needs client access)'
+insert into projects(owner_id, title, description) values ('44444444-4444-4444-4444-444444444444', 'x', 'y');
+\echo '== R2. freelancer makes self client by editing profile directly (expect is_client=f, trigger reverts it)'
+update profiles set is_client = true, role = 'client' where id = '44444444-4444-4444-4444-444444444444';
+select is_client, role from profiles where id = '44444444-4444-4444-4444-444444444444';
+\echo '== R3. "Become a client" via add_role (expect client)'
+select add_role('client');
+\echo '== R4. now posts project (expect status=open)'
+insert into projects(owner_id, title, description, status) values ('44444444-4444-4444-4444-444444444444', 'x', 'y', 'completed') returning status;
+\echo '== R5. switch back to freelancer mode (expect freelancer)'
+select switch_role('freelancer');
+
+-- Payments: users can only read; funding/paid status only via the server (service role)
+reset role; select set_config('request.jwt.claim.sub', '', false) \g /dev/null
+insert into milestones(id, project_id, title, amount) values ('cccccccc-0000-0000-0000-000000000009', 'bbbbbbbb-0000-0000-0000-000000000002', 'funded one', 1000);
+insert into milestone_payments(id, milestone_id, project_id, payer_id, razorpay_order_id, milestone_amount, client_fee, team_commission, total_amount, payouts, status)
+  values ('ffffffff-0000-0000-0000-000000000001', 'cccccccc-0000-0000-0000-000000000009', 'bbbbbbbb-0000-0000-0000-000000000002', :C, 'order_test1', 100000, 5000, 8000, 105000, '[]', 'paid');
+update milestones set funded_at = now() where id = 'cccccccc-0000-0000-0000-000000000009';
+\echo '== P0. ledger rejects total != milestone + fee (expect ERROR)'
+insert into milestone_payments(milestone_id, project_id, payer_id, razorpay_order_id, milestone_amount, client_fee, team_commission, total_amount, payouts)
+  values ('cccccccc-0000-0000-0000-000000000009', 'bbbbbbbb-0000-0000-0000-000000000002', :C, 'order_bad', 100000, 5000, 8000, 999999, '[]');
+set role authenticated;
+select set_config('request.jwt.claim.sub', :C, false) \g /dev/null
+\echo '== P1. client edits amount of a funded milestone (expect ERROR)'
+update milestones set amount = 1 where id = 'cccccccc-0000-0000-0000-000000000009';
+\echo '== P2. client deletes a funded milestone (expect DELETE 0)'
+delete from milestones where id = 'cccccccc-0000-0000-0000-000000000009';
+\echo '== P3. client un-funds it directly (expect ERROR)'
+update milestones set funded_at = null where id = 'cccccccc-0000-0000-0000-000000000009';
+\echo '== P4. client writes a fake payment row (expect ERROR)'
+insert into milestone_payments(milestone_id, project_id, payer_id, razorpay_order_id, milestone_amount, client_fee, team_commission, total_amount, payouts)
+  values ('cccccccc-0000-0000-0000-000000000001', 'bbbbbbbb-0000-0000-0000-000000000001', :C, 'order_fake', 100000, 5000, 8000, 105000, '[]');
+\echo '== P5. client reads own project payment (expect 1)'
+select count(*) from milestone_payments;
+select set_config('request.jwt.claim.sub', :M, false) \g /dev/null
+\echo '== P6. team member marks own unfunded milestone funded (expect ERROR)'
+update milestones set funded_at = now() where id = 'cccccccc-0000-0000-0000-000000000001';
+\echo '== P7. member points own payouts at an account id (expect ERROR - server only)'
+insert into payout_accounts(user_id, razorpay_account_id) values (:M, 'acc_attacker');
+select set_config('request.jwt.claim.sub', :X, false) \g /dev/null
+\echo '== P8. stranger reads payments + payout accounts (expect 0, 0)'
+select (select count(*) from milestone_payments) as payments, (select count(*) from payout_accounts) as accounts;
+reset role; select set_config('request.jwt.claim.sub', '', false) \g /dev/null
+\echo '== P9. server (no user) releases: approved -> paid (expect UPDATE 1)'
+update milestones set status = 'submitted' where id = 'cccccccc-0000-0000-0000-000000000009';
+update milestones set status = 'approved' where id = 'cccccccc-0000-0000-0000-000000000009';
+update milestones set status = 'paid' where id = 'cccccccc-0000-0000-0000-000000000009';

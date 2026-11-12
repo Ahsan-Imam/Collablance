@@ -1,16 +1,19 @@
 import { createClient } from '@/lib/supabase/server'
 import { getProjectAccess } from '@/lib/projectAccess'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { paymentsEnabled } from '@/lib/payments/razorpay'
+import { releaseMilestone } from '@/lib/payments/escrow'
 import { NextResponse } from 'next/server'
 
-const COLUMNS = 'id,project_id,title,description,amount,currency,order_index,status,due_date,submitted_at,approved_at,approved_by,created_at,updated_at'
+const COLUMNS = 'id,project_id,title,description,amount,currency,order_index,status,due_date,submitted_at,approved_at,approved_by,funded_at,created_at,updated_at'
 
 async function loadMilestone(supabase, id) {
-  return supabase.from('milestones').select('id,project_id,status').eq('id', id).maybeSingle()
+  return supabase.from('milestones').select('id,project_id,status,funded_at').eq('id', id).maybeSingle()
 }
 
 // PATCH /api/milestones/[id] — status transitions, role-restricted.
-// 'paid' is intentionally not settable here — that only happens once
-// payments are wired up, via the Razorpay webhook.
+// 'paid' is never settable here — approving a funded milestone releases the
+// escrow, and lib/payments marks it paid.
 export async function PATCH(request, { params }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -35,6 +38,7 @@ export async function PATCH(request, { params }) {
   if (editingFields) {
     if (!isOwner) return NextResponse.json({ error: 'Only the project owner can edit a milestone' }, { status: 403 })
     if (milestone.status !== 'pending') return NextResponse.json({ error: 'Can only edit a milestone before it has been submitted' }, { status: 400 })
+    if (milestone.funded_at) return NextResponse.json({ error: 'A funded milestone can’t be edited' }, { status: 400 })
     if (title !== undefined) updates.title = title.trim()
     if (description !== undefined) updates.description = description?.trim() || null
     if (amount !== undefined) updates.amount = Number(amount)
@@ -52,6 +56,9 @@ export async function PATCH(request, { params }) {
 
     if (!valid) {
       return NextResponse.json({ error: `Cannot move milestone from "${from}" to "${status}" with your role` }, { status: 400 })
+    }
+    if (paymentsEnabled() && ['submitted', 'approved'].includes(status) && !milestone.funded_at) {
+      return NextResponse.json({ error: 'The client needs to fund this milestone first' }, { status: 400 })
     }
 
     updates.status = status
@@ -71,6 +78,18 @@ export async function PATCH(request, { params }) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Approval releases the team's held payouts. If Razorpay fails, the approval
+  // still stands and the client can retry via POST /api/milestones/[id]/release.
+  if (status === 'approved' && paymentsEnabled()) {
+    try {
+      await releaseMilestone(createAdminClient(), id)
+      return NextResponse.json({ data: { ...data, status: 'paid' } })
+    } catch (err) {
+      console.error('[payments] release on approval failed for milestone', id, err.message)
+      return NextResponse.json({ data, releaseError: 'Approved, but paying the team failed — use “Retry payout”.' })
+    }
+  }
   return NextResponse.json({ data })
 }
 
@@ -89,6 +108,7 @@ export async function DELETE(request, { params }) {
   if (accessErr) return NextResponse.json({ error: accessErr }, { status: 500 })
   if (!isOwner) return NextResponse.json({ error: 'Only the project owner can delete a milestone' }, { status: 403 })
   if (milestone.status !== 'pending') return NextResponse.json({ error: 'Can only delete a milestone before it has been submitted' }, { status: 400 })
+  if (milestone.funded_at) return NextResponse.json({ error: 'A funded milestone can’t be deleted' }, { status: 400 })
 
   const { error } = await supabase.from('milestones').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
