@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import FundMilestoneButton from '@/components/FundMilestoneButton/FundMilestoneButton'
 import '../projects.css'
 import './project.css'
 
@@ -308,6 +309,7 @@ export default function ProjectDetailPage() {
   const [milestones, setMilestones] = useState([])
   const [showMilestoneForm, setShowMilestoneForm] = useState(false)
   const [milestoneBusyId, setMilestoneBusyId] = useState(null)
+  const [paymentsEnabled, setPaymentsEnabled] = useState(false)
   const [reviews, setReviews] = useState([])
   const [myOwnedTeams, setMyOwnedTeams] = useState([])
   const [applications, setApplications] = useState([])
@@ -332,10 +334,7 @@ export default function ProjectDetailPage() {
       .then(json => setIsTeamMember(!!json.isMember))
       .catch(() => {})
 
-    fetch(`/api/projects/${id}/milestones`)
-      .then(r => r.json())
-      .then(json => setMilestones(json.data || []))
-      .catch(() => {})
+    loadMilestones()
 
     fetch(`/api/projects/${id}/reviews`)
       .then(r => r.json())
@@ -358,6 +357,8 @@ export default function ProjectDetailPage() {
       .then(r => r.json())
       .then(json => setApplications(json.data || []))
       .catch(() => {})
+  // loadMilestones only depends on id
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   // Which team's payment split contract is relevant here — either the team
@@ -413,6 +414,28 @@ export default function ProjectDetailPage() {
     }
   }
 
+  function loadMilestones() {
+    return fetch(`/api/projects/${id}/milestones`)
+      .then(r => r.json())
+      .then(json => { setMilestones(json.data || []); setPaymentsEnabled(!!json.paymentsEnabled) })
+      .catch(() => {})
+  }
+
+  const handleRetryPayout = async (milestoneId) => {
+    setMilestoneBusyId(milestoneId)
+    setError('')
+    try {
+      const res = await fetch(`/api/milestones/${milestoneId}/release`, { method: 'POST' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      setMilestones(prev => prev.map(m => m.id === milestoneId ? { ...m, status: 'paid' } : m))
+    } catch (err) {
+      setError(err.message || 'Payout failed')
+    } finally {
+      setMilestoneBusyId(null)
+    }
+  }
+
   const handleMilestoneStatus = async (milestoneId, status) => {
     setMilestoneBusyId(milestoneId)
     setError('')
@@ -425,6 +448,7 @@ export default function ProjectDetailPage() {
       const json = await res.json()
       if (!res.ok) throw new Error(json.error)
       setMilestones(prev => prev.map(m => m.id === milestoneId ? json.data : m))
+      if (json.releaseError) setError(json.releaseError)
     } catch (err) {
       setError(err.message || 'Failed to update milestone')
     } finally {
@@ -701,7 +725,21 @@ export default function ProjectDetailPage() {
                       <span className="badge" style={{ background: `${MILESTONE_STATUS_COLORS[m.status]}18`, color: MILESTONE_STATUS_COLORS[m.status] }}>
                         {MILESTONE_STATUS_LABELS[m.status] || m.status}
                       </span>
-                      {isTeamMember && m.status === 'pending' && (
+                      {paymentsEnabled && m.funded_at && m.status !== 'paid' && (
+                        <span className="badge" style={{ background: '#05966918', color: '#059669' }}>Funded</span>
+                      )}
+                      {paymentsEnabled && isOwner && m.status === 'pending' && !m.funded_at && project.status === 'in_progress' && (
+                        <FundMilestoneButton milestoneId={m.id} onFunded={loadMilestones} onError={setError} />
+                      )}
+                      {paymentsEnabled && isTeamMember && m.status === 'pending' && !m.funded_at && (
+                        <span style={{ fontSize: '0.8125rem', color: 'var(--cl-text-secondary)' }}>Waiting for the client to fund</span>
+                      )}
+                      {isOwner && paymentsEnabled && m.status === 'approved' && m.funded_at && (
+                        <button className="btn btn--primary btn--sm" disabled={milestoneBusyId === m.id} onClick={() => handleRetryPayout(m.id)}>
+                          Retry payout
+                        </button>
+                      )}
+                      {isTeamMember && m.status === 'pending' && (!paymentsEnabled || m.funded_at) && (
                         <button className="btn btn--primary btn--sm" disabled={milestoneBusyId === m.id} onClick={() => handleMilestoneStatus(m.id, 'submitted')}>
                           Submit
                         </button>
@@ -721,7 +759,7 @@ export default function ProjectDetailPage() {
                           Dispute
                         </button>
                       )}
-                      {isOwner && m.status === 'pending' && (
+                      {isOwner && m.status === 'pending' && !m.funded_at && (
                         <button className="btn btn--ghost btn--sm" disabled={milestoneBusyId === m.id} onClick={() => handleDeleteMilestone(m.id)}>
                           Delete
                         </button>
@@ -732,7 +770,9 @@ export default function ProjectDetailPage() {
               </div>
             )}
             <p style={{ fontSize: '0.75rem', color: 'var(--cl-text-tertiary)', marginTop: 'var(--space-md)' }}>
-              Payment release isn&apos;t wired up yet — approving a milestone records approval but doesn&apos;t move money.
+              {paymentsEnabled
+                ? 'The client funds each milestone before work starts. The money is held by Razorpay and paid to the team, per the signed split, when the client approves.'
+                : 'Online payments are coming soon — for now, approving a milestone records approval but doesn’t move money.'}
             </p>
           </div>
         )}

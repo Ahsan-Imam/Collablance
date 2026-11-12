@@ -100,3 +100,39 @@ select add_role('client');
 insert into projects(owner_id, title, description, status) values ('44444444-4444-4444-4444-444444444444', 'x', 'y', 'completed') returning status;
 \echo '== R5. switch back to freelancer mode (expect freelancer)'
 select switch_role('freelancer');
+
+-- Payments: users can only read; funding/paid status only via the server (service role)
+reset role; select set_config('request.jwt.claim.sub', '', false) \g /dev/null
+insert into milestones(id, project_id, title, amount) values ('cccccccc-0000-0000-0000-000000000009', 'bbbbbbbb-0000-0000-0000-000000000002', 'funded one', 1000);
+insert into milestone_payments(id, milestone_id, project_id, payer_id, razorpay_order_id, milestone_amount, client_fee, team_commission, total_amount, payouts, status)
+  values ('ffffffff-0000-0000-0000-000000000001', 'cccccccc-0000-0000-0000-000000000009', 'bbbbbbbb-0000-0000-0000-000000000002', :C, 'order_test1', 100000, 5000, 8000, 105000, '[]', 'paid');
+update milestones set funded_at = now() where id = 'cccccccc-0000-0000-0000-000000000009';
+\echo '== P0. ledger rejects total != milestone + fee (expect ERROR)'
+insert into milestone_payments(milestone_id, project_id, payer_id, razorpay_order_id, milestone_amount, client_fee, team_commission, total_amount, payouts)
+  values ('cccccccc-0000-0000-0000-000000000009', 'bbbbbbbb-0000-0000-0000-000000000002', :C, 'order_bad', 100000, 5000, 8000, 999999, '[]');
+set role authenticated;
+select set_config('request.jwt.claim.sub', :C, false) \g /dev/null
+\echo '== P1. client edits amount of a funded milestone (expect ERROR)'
+update milestones set amount = 1 where id = 'cccccccc-0000-0000-0000-000000000009';
+\echo '== P2. client deletes a funded milestone (expect DELETE 0)'
+delete from milestones where id = 'cccccccc-0000-0000-0000-000000000009';
+\echo '== P3. client un-funds it directly (expect ERROR)'
+update milestones set funded_at = null where id = 'cccccccc-0000-0000-0000-000000000009';
+\echo '== P4. client writes a fake payment row (expect ERROR)'
+insert into milestone_payments(milestone_id, project_id, payer_id, razorpay_order_id, milestone_amount, client_fee, team_commission, total_amount, payouts)
+  values ('cccccccc-0000-0000-0000-000000000001', 'bbbbbbbb-0000-0000-0000-000000000001', :C, 'order_fake', 100000, 5000, 8000, 105000, '[]');
+\echo '== P5. client reads own project payment (expect 1)'
+select count(*) from milestone_payments;
+select set_config('request.jwt.claim.sub', :M, false) \g /dev/null
+\echo '== P6. team member marks own unfunded milestone funded (expect ERROR)'
+update milestones set funded_at = now() where id = 'cccccccc-0000-0000-0000-000000000001';
+\echo '== P7. member points own payouts at an account id (expect ERROR - server only)'
+insert into payout_accounts(user_id, razorpay_account_id) values (:M, 'acc_attacker');
+select set_config('request.jwt.claim.sub', :X, false) \g /dev/null
+\echo '== P8. stranger reads payments + payout accounts (expect 0, 0)'
+select (select count(*) from milestone_payments) as payments, (select count(*) from payout_accounts) as accounts;
+reset role; select set_config('request.jwt.claim.sub', '', false) \g /dev/null
+\echo '== P9. server (no user) releases: approved -> paid (expect UPDATE 1)'
+update milestones set status = 'submitted' where id = 'cccccccc-0000-0000-0000-000000000009';
+update milestones set status = 'approved' where id = 'cccccccc-0000-0000-0000-000000000009';
+update milestones set status = 'paid' where id = 'cccccccc-0000-0000-0000-000000000009';

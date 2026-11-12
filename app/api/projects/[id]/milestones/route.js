@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { getProjectAccess } from '@/lib/projectAccess'
+import { paymentsEnabled } from '@/lib/payments/razorpay'
 import { NextResponse } from 'next/server'
 
-const COLUMNS = 'id,project_id,title,description,amount,currency,order_index,status,due_date,submitted_at,approved_at,approved_by,created_at,updated_at'
+const COLUMNS = 'id,project_id,title,description,amount,currency,order_index,status,due_date,submitted_at,approved_at,approved_by,funded_at,created_at,updated_at'
 
 // GET /api/projects/[id]/milestones
 export async function GET(request, { params }) {
@@ -23,7 +24,7 @@ export async function GET(request, { params }) {
     .order('created_at', { ascending: true })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data })
+  return NextResponse.json({ data, paymentsEnabled: paymentsEnabled() })
 }
 
 // POST /api/projects/[id]/milestones — client defines a milestone

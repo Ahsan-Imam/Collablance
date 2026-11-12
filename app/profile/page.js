@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRole } from '@/lib/hooks/useRole'
 import AddRoleButton from '@/components/AddRoleButton/AddRoleButton'
+import PayoutDetails from '@/components/PayoutDetails/PayoutDetails'
 import './profile.css'
 
 const SKILL_OPTIONS = [
@@ -320,6 +321,7 @@ export default function ProfilePage() {
             </button>
           </div>
         </form>
+        {hasFreelancer && <PayoutDetails />}
       </div>
     </div>
   )
